@@ -1,6 +1,9 @@
 headersOrigin = "config"
 redirectsOrigin = "config"
 
+[site]
+site_id = "981bad98-d237-4f72-a194-52bae2e4cd45"
+
 [functions]
 
 [functions."*"]
@@ -78,31 +81,31 @@ for = "/app-078591c701e6cef6caba.js.map"
 cache-control = "public, max-age=31536000, immutable"
 
 [[headers]]
-for = "/component---src-pages-index-js-cf37d7f185c76d0485e0.js"
+for = "/component---src-pages-index-js-c1321ce4e3db920ad33f.js"
 
 [headers.values]
 cache-control = "public, max-age=31536000, immutable"
 
 [[headers]]
-for = "/component---src-pages-index-js-cf37d7f185c76d0485e0.js.LICENSE.txt"
+for = "/component---src-pages-index-js-c1321ce4e3db920ad33f.js.LICENSE.txt"
 
 [headers.values]
 cache-control = "public, max-age=31536000, immutable"
 
 [[headers]]
-for = "/component---src-pages-index-js-cf37d7f185c76d0485e0.js.map"
+for = "/component---src-pages-index-js-c1321ce4e3db920ad33f.js.map"
 
 [headers.values]
 cache-control = "public, max-age=31536000, immutable"
 
 [[headers]]
-for = "/webpack-runtime-bdb23032c4073c4e4d45.js"
+for = "/webpack-runtime-1ab7a0ff93a89b43fdba.js"
 
 [headers.values]
 cache-control = "public, max-age=31536000, immutable"
 
 [[headers]]
-for = "/webpack-runtime-bdb23032c4073c4e4d45.js.map"
+for = "/webpack-runtime-1ab7a0ff93a89b43fdba.js.map"
 
 [headers.values]
 cache-control = "public, max-age=31536000, immutable"
