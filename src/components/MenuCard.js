@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Utensils, Edit3, Calendar, Clock, Sparkles, Check, AlertCircle } from 'lucide-react';
+import { Edit3, Calendar, Clock, Sparkles, Check, AlertCircle } from 'lucide-react';
 
 const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,14 +18,14 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Ambient Glow */}
+      {/* Ambient Sun Glow */}
       <div style={{
         position: 'absolute',
         top: '-40px',
         right: '-40px',
         width: '180px',
         height: '180px',
-        background: 'radial-gradient(circle, rgba(249, 115, 22, 0.25) 0%, rgba(168, 85, 247, 0) 70%)',
+        background: 'radial-gradient(circle, rgba(245, 194, 59, 0.25) 0%, rgba(74, 46, 99, 0) 70%)',
         pointerEvents: 'none'
       }} />
 
@@ -33,22 +33,22 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{
-            background: 'linear-gradient(135deg, var(--accent-sunset) 0%, var(--accent-pink) 100%)',
-            color: '#fff',
+            background: 'var(--color-yellow)',
+            color: '#1A0D28',
             padding: '4px 12px',
             borderRadius: '20px',
             fontSize: '0.8rem',
-            fontWeight: 700,
+            fontWeight: 800,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)'
+            boxShadow: '0 2px 10px rgba(245, 194, 59, 0.35)'
           }}>
-            <Sparkles size={14} /> Almoço do Dia ☀️
+            <Sparkles size={14} color="#1A0D28" /> Almoço do Dia ☀️
           </span>
 
           <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Calendar size={14} /> {menu.date || new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            <Calendar size={14} color="var(--color-yellow)" /> {menu.date || new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </span>
         </div>
 
@@ -65,8 +65,8 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
 
       {/* Editing Form (Manager Mode) */}
       {isEditing ? (
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--accent-purple)' }}>Atualizar Almoço de Hoje ☀️</h3>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(26, 13, 40, 0.5)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+          <h3 style={{ fontSize: '1.1rem', color: 'var(--color-yellow)' }}>Atualizar Almoço de Hoje ☀️</h3>
           
           <div>
             <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Data / Exibição</label>
@@ -109,7 +109,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
               className="input-field" 
               value={formData.notes} 
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Ex: Almoço servido às 12:30h. Confirmar até às 10:01h!"
+              placeholder="Ex: Pedidos somente até 10h!"
             />
           </div>
 
@@ -117,7 +117,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
             <button type="button" onClick={() => setIsEditing(false)} className="btn btn-secondary">
               Cancelar
             </button>
-            <button type="submit" className="btn btn-sunset">
+            <button type="submit" className="btn btn-primary">
               <Check size={16} /> Salvar Almoço
             </button>
           </div>
@@ -131,16 +131,16 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
             </h2>
             {menu.sides && (
               <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
-                <strong style={{ color: 'var(--accent-purple)' }}>Acompanhamentos:</strong> {menu.sides}
+                <strong style={{ color: 'var(--color-yellow)' }}>Acompanhamentos:</strong> {menu.sides}
               </p>
             )}
           </div>
 
-          {/* Notes / Banner */}
+          {/* Notes Banner in Blue */}
           {menu.notes && (
             <div style={{
-              background: 'rgba(168, 85, 247, 0.12)',
-              borderLeft: '4px solid var(--accent-purple)',
+              background: 'rgba(30, 101, 181, 0.25)',
+              borderLeft: '4px solid var(--color-yellow)',
               padding: '10px 14px',
               borderRadius: '0 var(--radius-md) var(--radius-md) 0',
               color: 'var(--text-primary)',
@@ -149,7 +149,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
               alignItems: 'center',
               gap: '8px'
             }}>
-              <Clock size={16} color="var(--accent-purple)" />
+              <Clock size={16} color="var(--color-yellow)" />
               <span>{menu.notes}</span>
             </div>
           )}
@@ -158,18 +158,18 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
           {isOrderDeadlinePassed && (
             <div style={{
               marginTop: '12px',
-              background: 'rgba(245, 158, 11, 0.15)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
+              background: 'rgba(245, 194, 59, 0.15)',
+              border: '1px solid var(--color-yellow)',
               padding: '10px 14px',
               borderRadius: 'var(--radius-md)',
-              color: '#fbbf24',
+              color: 'var(--color-yellow)',
               fontSize: '0.875rem',
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
             }}>
-              <AlertCircle size={16} />
-              <span>Horário limite de 10:01h atingido. Alterações apenas via gerenciador.</span>
+              <AlertCircle size={16} color="var(--color-yellow)" />
+              <span>Horário limite de 10:00h atingido. Alterações apenas via gerenciador.</span>
             </div>
           )}
         </div>

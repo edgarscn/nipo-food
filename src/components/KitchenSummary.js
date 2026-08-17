@@ -9,7 +9,7 @@ const KitchenSummary = ({ orders, menu }) => {
   const totalPeople = orders.length;
 
   const handleCopyWhatsApp = () => {
-    let summaryText = `🍱 *NIPO FOOD - ALMOÇO DO DIA* 🍱\n`;
+    let summaryText = `🍱 *NIPOFOOD - ALMOÇO DO DIA* 🍱\n`;
     summaryText += `🗓️ *${menu.date || 'Hoje'}*\n`;
     summaryText += `🍲 *Prato:* ${menu.mainDish || 'Prato do Dia'}\n`;
     if (menu.sides) summaryText += `🥗 *Acompanhamentos:* ${menu.sides}\n`;
@@ -56,7 +56,7 @@ const KitchenSummary = ({ orders, menu }) => {
 
         <button 
           onClick={handleCopyWhatsApp}
-          className="btn btn-sunset"
+          className="btn btn-primary"
           style={{ fontSize: '0.85rem', padding: '8px 14px' }}
         >
           {copied ? <Check size={16} /> : <Share2 size={16} />}
@@ -64,69 +64,66 @@ const KitchenSummary = ({ orders, menu }) => {
         </button>
       </div>
 
-      {/* Grid of Total Counters */}
+      {/* Grid of Total Counters using the 3 logo colors */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
         gap: '12px'
       }}>
 
-        {/* Refeições Presenciais */}
+        {/* Refeições Presenciais (Amarelo Sol) */}
         <div style={{
-          background: 'rgba(168, 85, 247, 0.12)',
-          border: '1px solid rgba(168, 85, 247, 0.25)',
+          background: 'rgba(245, 194, 59, 0.15)',
+          border: '1px solid var(--color-yellow)',
           borderRadius: 'var(--radius-md)',
           padding: '14px',
-          textAlign: 'center',
-          transition: 'transform 0.2s ease'
+          textAlign: 'center'
         }}>
-          <div style={{ color: 'var(--accent-purple)', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ color: 'var(--color-yellow)', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>
             <Utensils size={24} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>
             {totalMeals}
           </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', fontWeight: 500 }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--color-yellow)', marginTop: '4px', fontWeight: 600 }}>
             Refeições no Local
           </div>
         </div>
 
-        {/* Marmitas */}
+        {/* Marmitas (Azul Oceano) */}
         <div style={{
-          background: 'rgba(249, 115, 22, 0.12)',
-          border: '1px solid rgba(249, 115, 22, 0.25)',
+          background: 'rgba(30, 101, 181, 0.25)',
+          border: '1px solid var(--color-blue)',
           borderRadius: 'var(--radius-md)',
           padding: '14px',
-          textAlign: 'center',
-          transition: 'transform 0.2s ease'
+          textAlign: 'center'
         }}>
-          <div style={{ color: 'var(--accent-sunset)', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ color: '#FFFFFF', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>
             <Box size={24} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>
             {totalBoxes}
           </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', fontWeight: 500 }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', fontWeight: 600 }}>
             Marmitas para Levar
           </div>
         </div>
 
-        {/* Total Moradores */}
+        {/* Total Moradores (Roxo Crepúsculo) */}
         <div style={{
-          background: 'rgba(6, 182, 212, 0.12)',
-          border: '1px solid rgba(6, 182, 212, 0.25)',
+          background: 'rgba(74, 46, 99, 0.6)',
+          border: '1px solid rgba(245, 194, 59, 0.3)',
           borderRadius: 'var(--radius-md)',
           padding: '14px',
-          textAlign: 'center',
-          transition: 'transform 0.2s ease'
+          textAlign: 'center'
         }}>
-          <div style={{ color: 'var(--accent-teal)', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ color: 'var(--color-yellow)', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>
             <Users size={24} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>
             {totalPeople}
           </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', fontWeight: 500 }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', fontWeight: 600 }}>
             Moradores Confirmados
           </div>
         </div>

@@ -1,48 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
 
 :root {
-  /* Vibrant Nipo Food Palette */
-  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --bg-card-hover: rgba(51, 65, 85, 0.8);
-  --border-color: rgba(255, 255, 255, 0.12);
-  --border-glow: rgba(168, 85, 247, 0.4);
+  /* Strict 3-Color Palette from NipoFood Sunset Logo */
+  --color-purple-dark: #2A173B;
+  --color-purple: #4A2E63;
+  --color-purple-light: #6B4C85;
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --color-yellow: #F5C23B;
+  --color-yellow-dark: #D4A120;
 
-  --accent-purple: #a855f7;
-  --accent-purple-dark: #7e22ce;
-  --accent-pink: #ec4899;
-  --accent-sunset: #f97316;
-  --accent-gold: #f59e0b;
-  --accent-teal: #06b6d4;
-  --accent-green: #10b981;
-  --accent-red: #ef4444;
+  --color-blue: #1E65B5;
+  --color-blue-dark: #154D8C;
 
-  --glass-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 85, 247, 0.15);
+  /* Theme Surfaces (Using the 3 Core Colors + Neutrals for Legibility) */
+  --bg-gradient: linear-gradient(135deg, var(--color-purple-dark) 0%, #1A0D28 100%);
+  --bg-card: rgba(74, 46, 99, 0.45);
+  --bg-card-hover: rgba(74, 46, 99, 0.65);
+  --border-color: rgba(245, 194, 59, 0.25);
+  --border-blue: rgba(30, 101, 181, 0.4);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #E2E8F0;
+  --text-muted: #A0AEC0;
+
+  --glass-shadow: 0 16px 36px -10px rgba(26, 13, 40, 0.6), 0 0 20px rgba(245, 194, 59, 0.1);
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --radius-xl: 28px;
 
   --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 [data-theme='light'] {
-  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, #e2e8f0 100%);
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: rgba(255, 255, 255, 0.98);
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-glow: rgba(168, 85, 247, 0.3);
+  --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --border-color: rgba(30, 101, 181, 0.2);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-primary: #1A0D28;
+  --text-secondary: #4A2E63;
+  --text-muted: #6C757D;
 
-  --glass-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+  --glass-shadow: 0 10px 30px -10px rgba(74, 46, 99, 0.12);
 }
 
 * {
@@ -62,7 +62,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Typography Utilities */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -81,17 +80,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: var(--color-yellow);
 }
 
-/* Sunset Gradient Text */
+/* Yellow Sun Highlight Text */
 .gradient-text {
-  background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--color-yellow);
 }
 
-/* Buttons */
+/* Buttons (Yellow Primary, Blue Secondary, Purple Subtle) */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -99,7 +96,7 @@ h1, h2, h3, h4, h5, h6 {
   gap: 8px;
   padding: 12px 20px;
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   border-radius: var(--radius-md);
   border: none;
@@ -108,71 +105,71 @@ h1, h2, h3, h4, h5, h6 {
   outline: none;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+/* 1. Yellow Sun Primary Button */
+.btn-primary, .btn-sunset {
+  background: var(--color-yellow);
+  color: #1A0D28;
+  box-shadow: 0 4px 15px rgba(245, 194, 59, 0.35);
 }
 
-.btn-primary:hover {
+.btn-primary:hover, .btn-sunset:hover {
+  background: var(--color-yellow-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+  box-shadow: 0 6px 20px rgba(245, 194, 59, 0.5);
 }
 
-.btn-sunset {
-  background: linear-gradient(135deg, var(--accent-sunset) 0%, var(--accent-pink) 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
-}
-
-.btn-sunset:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
-}
-
+/* 2. Ocean Blue Secondary Button */
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  background: var(--color-blue);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--color-blue-dark);
+  transform: translateY(-1px);
+}
+
+/* 3. Purple Accent Button */
+.btn-purple {
+  background: var(--color-purple);
+  color: var(--color-yellow);
+  border: 1px solid var(--color-yellow);
+}
+
+.btn-purple:hover {
+  background: var(--color-purple-light);
 }
 
 .btn-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.btn-danger:hover {
-  background: rgba(239, 68, 68, 0.3);
-  color: #ffffff;
+  background: rgba(30, 101, 181, 0.3);
+  color: var(--color-yellow);
+  border: 1px solid var(--color-yellow);
 }
 
 /* Inputs & Form Elements */
 .input-field {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(26, 13, 40, 0.6);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
+  color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 1rem;
   transition: all 0.2s ease;
 }
 
 [data-theme='light'] .input-field {
-  background: rgba(255, 255, 255, 0.8);
+  background: #FFFFFF;
+  color: #1A0D28;
+  border-color: var(--color-blue);
 }
 
 .input-field:focus {
   outline: none;
-  border-color: var(--accent-purple);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+  border-color: var(--color-yellow);
+  box-shadow: 0 0 0 3px rgba(245, 194, 59, 0.25);
 }
 
 /* Animations */
@@ -190,12 +187,9 @@ h1, h2, h3, h4, h5, h6 {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--color-purple-dark);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.4);
+  background: var(--color-yellow);
   border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.7);
 }

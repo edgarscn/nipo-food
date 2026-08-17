@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Utensils, Box, Plus, CheckCircle, MessageSquare, Lock } from 'lucide-react';
 
-const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePassed, isManager, deadlineTime = "10:01" }) => {
+const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePassed, isManager, deadlineTime = "10:00" }) => {
   const [name, setName] = useState('');
   const [meals, setMeals] = useState(1);
   const [boxes, setBoxes] = useState(0);
@@ -56,7 +56,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
         }}>
           ✍️ Colocar Nome na Lista
         </h3>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: '0.8rem', color: 'var(--color-yellow)' }}>
           Horário Limite: <strong>{deadlineTime}h</strong>
         </span>
       </div>
@@ -64,9 +64,9 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
       {/* Deadline Passed Alert */}
       {isDisabled && (
         <div style={{
-          background: 'rgba(245, 158, 11, 0.15)',
-          border: '1px solid rgba(245, 158, 11, 0.3)',
-          color: '#fbbf24',
+          background: 'rgba(245, 194, 59, 0.15)',
+          border: '1px solid var(--color-yellow)',
+          color: 'var(--color-yellow)',
           padding: '12px 16px',
           borderRadius: 'var(--radius-md)',
           marginBottom: '16px',
@@ -75,18 +75,18 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
           gap: '10px',
           fontSize: '0.875rem'
         }}>
-          <Lock size={20} style={{ flexShrink: 0 }} />
+          <Lock size={20} style={{ flexShrink: 0 }} color="var(--color-yellow)" />
           <span>
-            <strong>Inscrições Encerradas ({deadlineTime}h)</strong>: Não é mais possível incluir novos pedidos para a refeição de hoje. Fale com o gerenciador se precisar de exceção.
+            <strong>Inscrições Encerradas ({deadlineTime}h)</strong>: Não é mais possível incluir novos pedidos para o almoço de hoje. Fale com o gerenciador se precisar de exceção.
           </span>
         </div>
       )}
 
       {submittedMessage && (
         <div style={{
-          background: 'rgba(16, 185, 129, 0.15)',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
-          color: '#34d399',
+          background: 'rgba(30, 101, 181, 0.3)',
+          border: '1px solid var(--color-yellow)',
+          color: 'var(--color-yellow)',
           padding: '12px 16px',
           borderRadius: 'var(--radius-md)',
           marginBottom: '16px',
@@ -95,7 +95,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
           gap: '8px',
           fontSize: '0.9rem'
         }}>
-          <CheckCircle size={18} />
+          <CheckCircle size={18} color="var(--color-yellow)" />
           <span>{submittedMessage}</span>
         </div>
       )}
@@ -118,10 +118,10 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
               disabled={isDisabled}
               style={{ paddingLeft: '40px', opacity: isDisabled ? 0.6 : 1 }}
             />
-            <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-purple)' }} />
+            <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-yellow)' }} />
           </div>
 
-          {/* Quick Name Pills if available and enabled */}
+          {/* Quick Name Pills */}
           {existingNames.length > 0 && !name && !isDisabled && (
             <div style={{ marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sugestões:</span>
@@ -131,9 +131,9 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                   type="button" 
                   onClick={() => handleSelectExistingName(n)}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--text-secondary)',
+                    background: 'var(--color-blue)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
                     borderRadius: '12px',
                     padding: '2px 8px',
                     fontSize: '0.75rem',
@@ -157,13 +157,13 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
           
           {/* Refeições no local */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.4)',
+            background: 'rgba(26, 13, 40, 0.4)',
             padding: '16px',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-color)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <Utensils size={18} color="var(--accent-purple)" />
+              <Utensils size={18} color="var(--color-yellow)" />
               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Refeição no Local</span>
             </div>
 
@@ -179,9 +179,9 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                       width: '36px',
                       height: '36px',
                       borderRadius: 'var(--radius-sm)',
-                      border: meals === num ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)',
-                      background: meals === num ? 'rgba(168, 85, 247, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                      color: meals === num ? '#ffffff' : 'var(--text-secondary)',
+                      border: meals === num ? '2px solid var(--color-yellow)' : '1px solid var(--border-color)',
+                      background: meals === num ? 'var(--color-yellow)' : 'rgba(255, 255, 255, 0.05)',
+                      color: meals === num ? '#1A0D28' : 'var(--text-secondary)',
                       fontWeight: 700,
                       cursor: isDisabled ? 'not-allowed' : 'pointer',
                       transition: 'all 0.15s ease'
@@ -197,13 +197,13 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
 
           {/* Marmitas */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.4)',
+            background: 'rgba(26, 13, 40, 0.4)',
             padding: '16px',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-color)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <Box size={18} color="var(--accent-sunset)" />
+              <Box size={18} color="var(--color-blue)" />
               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Marmitas para Levar</span>
             </div>
 
@@ -219,9 +219,9 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                       width: '36px',
                       height: '36px',
                       borderRadius: 'var(--radius-sm)',
-                      border: boxes === num ? '2px solid var(--accent-sunset)' : '1px solid var(--border-color)',
-                      background: boxes === num ? 'rgba(249, 115, 22, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                      color: boxes === num ? '#ffffff' : 'var(--text-secondary)',
+                      border: boxes === num ? '2px solid var(--color-blue)' : '1px solid var(--border-color)',
+                      background: boxes === num ? 'var(--color-blue)' : 'rgba(255, 255, 255, 0.05)',
+                      color: boxes === num ? '#FFFFFF' : 'var(--text-secondary)',
                       fontWeight: 700,
                       cursor: isDisabled ? 'not-allowed' : 'pointer',
                       transition: 'all 0.15s ease'
@@ -252,7 +252,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
               disabled={isDisabled}
               style={{ paddingLeft: '40px', opacity: isDisabled ? 0.6 : 1 }}
             />
-            <MessageSquare size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-teal)' }} />
+            <MessageSquare size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-blue)' }} />
           </div>
         </div>
 

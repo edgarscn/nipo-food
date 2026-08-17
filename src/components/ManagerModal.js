@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Trash2, Key, Clock, Download, Upload, X, Check } from 'lucide-react';
+import { ShieldAlert, Trash2, Key, Clock, Download, X, Check } from 'lucide-react';
 
 const ManagerModal = ({ 
   isOpen, 
@@ -45,7 +45,7 @@ const ManagerModal = ({
     const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", jsonStr);
-    downloadAnchor.setAttribute("download", `nipo-food-backup-${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `nipofood-backup-${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -58,7 +58,7 @@ const ManagerModal = ({
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(15, 23, 42, 0.85)',
+      background: 'rgba(26, 13, 40, 0.9)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
@@ -78,14 +78,14 @@ const ManagerModal = ({
         
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '1.3rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-            <ShieldAlert size={20} /> Painel de Controle do Gerenciador
+          <h3 style={{ fontSize: '1.3rem', color: 'var(--color-yellow)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+            <ShieldAlert size={20} color="var(--color-yellow)" /> Painel de Controle do Gerenciador
           </h3>
           <button 
             onClick={onClose}
             style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
           >
-            <X size={20} />
+            <X size={20} color="var(--color-yellow)" />
           </button>
         </div>
 
@@ -93,34 +93,34 @@ const ManagerModal = ({
 
           {/* Action 1: Reset Orders */}
           <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
+            background: 'rgba(245, 194, 59, 0.1)',
+            border: '1px solid var(--color-yellow)',
             padding: '16px',
             borderRadius: 'var(--radius-md)'
           }}>
-            <h4 style={{ color: '#fca5a5', fontSize: '1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <h4 style={{ color: 'var(--color-yellow)', fontSize: '1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Trash2 size={16} /> Zerar Lista de Pedidos do Dia
             </h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-              Limpa todas as refeições e marmitas cadastradas hoje para iniciar um novo dia de cardápio.
+              Limpa todas as refeições e marmitas cadastradas hoje para iniciar um novo dia de almoço.
             </p>
-            <button onClick={handleReset} className="btn btn-danger" style={{ fontSize: '0.85rem' }}>
+            <button onClick={handleReset} className="btn btn-primary" style={{ fontSize: '0.85rem' }}>
               {resetSuccess ? "Lista Zerada com Sucesso!" : "Zerar Lista do Dia"}
             </button>
           </div>
 
           {/* Action 2: Deadline Time */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.5)',
+            background: 'rgba(26, 13, 40, 0.5)',
             border: '1px solid var(--border-color)',
             padding: '16px',
             borderRadius: 'var(--radius-md)'
           }}>
-            <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={16} color="var(--accent-sunset)" /> Horário Limite para Pedidos
+            <h4 style={{ color: '#FFFFFF', fontSize: '1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Clock size={16} color="var(--color-yellow)" /> Horário Limite para Pedidos
             </h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-              Defina o horário após o qual moradores visualizarão um aviso de encerramento.
+              Defina o horário após o qual moradores visualizarão o aviso de encerramento (Padrão: 10:00).
             </p>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <input 
@@ -130,7 +130,7 @@ const ManagerModal = ({
                 onChange={(e) => setDeadlineTime(e.target.value)}
                 style={{ width: '140px' }}
               />
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--color-yellow)' }}>
                 {deadlineTime ? `Bloqueia após as ${deadlineTime}h` : 'Sem limite ativo'}
               </span>
             </div>
@@ -138,13 +138,13 @@ const ManagerModal = ({
 
           {/* Action 3: Change PIN */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.5)',
+            background: 'rgba(26, 13, 40, 0.5)',
             border: '1px solid var(--border-color)',
             padding: '16px',
             borderRadius: 'var(--radius-md)'
           }}>
-            <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Key size={16} color="var(--accent-teal)" /> Senha PIN do Gerenciador
+            <h4 style={{ color: '#FFFFFF', fontSize: '1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Key size={16} color="var(--color-yellow)" /> Senha PIN do Gerenciador
             </h4>
             <form onSubmit={handleChangePin} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '8px' }}>
               <input 
@@ -155,19 +155,19 @@ const ManagerModal = ({
                 onChange={(e) => setNewPin(e.target.value)}
               />
               <button type="submit" className="btn btn-secondary" style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                {pinSuccess ? <Check size={16} color="#34d399" /> : 'Atualizar PIN'}
+                {pinSuccess ? <Check size={16} color="var(--color-yellow)" /> : 'Atualizar PIN'}
               </button>
             </form>
           </div>
 
           {/* Action 4: Backup Data */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.5)',
+            background: 'rgba(26, 13, 40, 0.5)',
             border: '1px solid var(--border-color)',
             padding: '16px',
             borderRadius: 'var(--radius-md)'
           }}>
-            <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '6px' }}>
+            <h4 style={{ color: '#FFFFFF', fontSize: '1rem', marginBottom: '6px' }}>
               💾 Backup & Exportação
             </h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>

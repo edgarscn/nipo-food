@@ -53,30 +53,30 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
       gap: '16px'
     }} className="glass-panel animate-fade-in">
       
-      {/* Brand Identity */}
+      {/* Brand Identity with 3-color palette */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <img 
           src={logoImg} 
-          alt="Logo Nipo Food" 
+          alt="Logo NipoFood" 
           style={{
-            width: '56px',
-            height: '56px',
+            width: '60px',
+            height: '60px',
             borderRadius: '16px',
             objectFit: 'cover',
-            border: '2px solid var(--accent-purple)',
-            boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)'
+            border: '2px solid var(--color-yellow)',
+            boxShadow: '0 4px 14px rgba(245, 194, 59, 0.35)'
           }}
         />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h1 style={{ fontSize: '1.75rem', margin: 0 }} className="gradient-text">
-              Nipo Food
+            <h1 style={{ fontSize: '1.8rem', margin: 0, color: 'var(--color-yellow)' }}>
+              NipoFood
             </h1>
             {isManager && (
               <span style={{
-                background: 'rgba(236, 72, 153, 0.2)',
-                color: '#f472b6',
-                border: '1px solid rgba(236, 72, 153, 0.4)',
+                background: 'var(--color-blue)',
+                color: '#FFFFFF',
+                border: '1px solid var(--color-yellow)',
                 padding: '2px 10px',
                 borderRadius: '12px',
                 fontSize: '0.75rem',
@@ -87,7 +87,7 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
                 alignItems: 'center',
                 gap: '4px'
               }}>
-                <ShieldCheck size={13} /> Gerenciador
+                <ShieldCheck size={13} color="var(--color-yellow)" /> Gerenciador
               </span>
             )}
           </div>
@@ -97,10 +97,10 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
         </div>
       </div>
 
-      {/* Action Controls */}
+      {/* Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         
-        {/* Connection Status Badge */}
+        {/* Connection Status Badge (Blue / Yellow) */}
         <span style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -109,11 +109,11 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
           borderRadius: '20px',
           fontSize: '0.8rem',
           fontWeight: 600,
-          background: isOnline ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-          color: isOnline ? '#34d399' : '#fbbf24',
-          border: `1px solid ${isOnline ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`
+          background: isOnline ? 'rgba(30, 101, 181, 0.25)' : 'rgba(245, 194, 59, 0.25)',
+          color: isOnline ? '#FFFFFF' : 'var(--color-yellow)',
+          border: `1px solid ${isOnline ? 'var(--color-blue)' : 'var(--color-yellow)'}`
         }} title={isOnline ? "Conectado" : "Modo Offline PWA Ativo"}>
-          {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
+          {isOnline ? <Wifi size={14} color="var(--color-yellow)" /> : <WifiOff size={14} />}
           {isOnline ? "Online" : "Offline"}
         </span>
 
@@ -121,7 +121,7 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
         {canInstallPWA && (
           <button 
             onClick={handleInstallPWA} 
-            className="btn btn-sunset"
+            className="btn btn-primary"
             style={{ padding: '8px 14px', fontSize: '0.85rem' }}
           >
             <Smartphone size={16} /> Instalar PWA
@@ -135,7 +135,7 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
           style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}
           title={theme === 'dark' ? "Modo Claro" : "Modo Escuro"}
         >
-          {theme === 'dark' ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} color="#8b5cf6" />}
+          {theme === 'dark' ? <Sun size={18} color="var(--color-yellow)" /> : <Moon size={18} color="#FFFFFF" />}
         </button>
 
         {/* Login / Logout Button */}
@@ -143,7 +143,7 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
           <button 
             onClick={onLogoutManager}
             className="btn btn-secondary"
-            style={{ fontSize: '0.85rem', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+            style={{ fontSize: '0.85rem', color: 'var(--color-yellow)', border: '1px solid var(--color-yellow)' }}
             title="Sair do modo gerenciador"
           >
             <LogOut size={16} /> Sair (Logout)
