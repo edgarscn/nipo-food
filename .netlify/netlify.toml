@@ -1,0 +1,158 @@
+headersOrigin = "config"
+redirectsOrigin = "config"
+
+[functions]
+
+[functions."*"]
+
+[[plugins]]
+origin = "default"
+package = "@netlify/plugin-gatsby"
+
+[plugins.inputs]
+
+[build]
+publish = "C:\\Users\\edgar\\OneDrive\\Desktop\\Projetos\\nipo-food\\public"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm run build"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+cache-control = "public, max-age=0, must-revalidate"
+x-xss-protection = "1; mode=block"
+x-content-type-options = "nosniff"
+referrer-policy = "same-origin"
+x-frame-options = "DENY"
+
+[[headers]]
+for = "/static/*"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/framework-9c3d908210cb4d4f6740.js"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/framework-9c3d908210cb4d4f6740.js.LICENSE.txt"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/framework-9c3d908210cb4d4f6740.js.map"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/app-078591c701e6cef6caba.js"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/app-078591c701e6cef6caba.js.map"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/component---src-pages-index-js-cf37d7f185c76d0485e0.js"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/component---src-pages-index-js-cf37d7f185c76d0485e0.js.LICENSE.txt"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/component---src-pages-index-js-cf37d7f185c76d0485e0.js.map"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/webpack-runtime-bdb23032c4073c4e4d45.js"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/webpack-runtime-bdb23032c4073c4e4d45.js.map"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/styles.3692ad6e887ccc398d03.css/"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/component---cache-caches-gatsby-plugin-offline-app-shell-js-8aa353a60fc9a1dc0f85.js"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/component---cache-caches-gatsby-plugin-offline-app-shell-js-8aa353a60fc9a1dc0f85.js.map"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/454-57b70076b5ba93fa4a59.js"
+
+[headers.values]
+cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+X-Frame-Options = "DENY"
+X-XSS-Protection = "1; mode=block"
+X-Content-Type-Options = "nosniff"
+
+[[headers]]
+for = "/sw.js"
+
+[headers.values]
+Cache-Control = "no-cache"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]

@@ -44,7 +44,6 @@ const IndexPage = () => {
       const savedMenu = localStorage.getItem('nipo_food_menu');
       if (savedMenu) {
         const parsedMenu = JSON.parse(savedMenu);
-        // Overwrite or update notes if it still contains old "servido" text
         if (parsedMenu.notes && parsedMenu.notes.toLowerCase().includes('servid')) {
           parsedMenu.notes = 'Pedidos somente até 10h!';
         }
@@ -123,9 +122,10 @@ const IndexPage = () => {
     setIsManagerModalOpen(false);
   };
 
+  // Fixed PIN validation: Only accepts current active managerPin
   const handleVerifyPin = (e) => {
     e.preventDefault();
-    if (inputPin === managerPin || inputPin === '1234') {
+    if (inputPin.trim() === managerPin.trim()) {
       setLoginSuccessMsg('Login realizado com sucesso!');
       setTimeout(() => {
         setIsManager(true);
@@ -184,8 +184,8 @@ const IndexPage = () => {
         {/* Manager Connected Alert Bar */}
         {isManager && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%)',
-            border: '1px solid rgba(168, 85, 247, 0.4)',
+            background: 'linear-gradient(135deg, rgba(74, 46, 99, 0.4) 0%, rgba(30, 101, 181, 0.4) 100%)',
+            border: '1px solid var(--color-yellow)',
             padding: '12px 20px',
             borderRadius: 'var(--radius-md)',
             marginBottom: '20px',
@@ -195,12 +195,12 @@ const IndexPage = () => {
             flexWrap: 'wrap',
             gap: '10px'
           }} className="animate-fade-in">
-            <span style={{ fontSize: '0.9rem', color: '#f472b6', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={18} /> Você está autenticado como Gerenciador (Bloqueios ignorados).
+            <span style={{ fontSize: '0.9rem', color: 'var(--color-yellow)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={18} color="var(--color-yellow)" /> Você está autenticado como Gerenciador.
             </span>
             <button 
               onClick={() => setIsManagerModalOpen(true)}
-              className="btn btn-sunset"
+              className="btn btn-primary"
               style={{ padding: '6px 14px', fontSize: '0.8rem' }}
             >
               Configurações & Administrar Lista
@@ -251,10 +251,10 @@ const IndexPage = () => {
           fontSize: '0.85rem'
         }}>
           <p style={{ marginBottom: '4px' }}>
-            🍱 <strong>Nipo Food</strong> • Cardápio & Marmitas da República
+            🍱 <strong>NipoFood</strong> • Cardápio & Marmitas da República
           </p>
           <p style={{ fontSize: '0.75rem' }}>
-            Pedidos somente até 10h.
+            Pedidos somente até {deadlineTime}h.
           </p>
         </footer>
 
@@ -265,7 +265,7 @@ const IndexPage = () => {
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(15, 23, 42, 0.85)',
+          background: 'rgba(26, 13, 40, 0.9)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
@@ -281,29 +281,29 @@ const IndexPage = () => {
                 width: '52px',
                 height: '52px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%)',
-                color: '#fff',
+                background: 'var(--color-yellow)',
+                color: '#1A0D28',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: '12px',
-                boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)'
+                boxShadow: '0 4px 15px rgba(245, 194, 59, 0.4)'
               }}>
-                <KeyRound size={26} />
+                <KeyRound size={26} color="#1A0D28" />
               </div>
               <h3 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0 }}>
                 Login de Gerenciador
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Digite sua senha ou PIN de acesso para gerenciar o cardápio e a lista.
+                Digite a senha de gerenciador para liberar edições e configurações.
               </p>
             </div>
 
             {loginSuccessMsg ? (
               <div style={{
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                color: '#34d399',
+                background: 'rgba(30, 101, 181, 0.3)',
+                border: '1px solid var(--color-yellow)',
+                color: 'var(--color-yellow)',
                 padding: '12px',
                 borderRadius: 'var(--radius-md)',
                 textAlign: 'center',
@@ -313,7 +313,7 @@ const IndexPage = () => {
                 gap: '8px',
                 fontWeight: 600
               }}>
-                <CheckCircle size={18} /> {loginSuccessMsg}
+                <CheckCircle size={18} color="var(--color-yellow)" /> {loginSuccessMsg}
               </div>
             ) : (
               <form onSubmit={handleVerifyPin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -326,14 +326,14 @@ const IndexPage = () => {
                     <input 
                       type={showPassword ? "text" : "password"} 
                       className="input-field" 
-                      placeholder="PIN (Padrão: 1234)" 
+                      placeholder="Digite a senha..." 
                       value={inputPin}
                       onChange={(e) => setInputPin(e.target.value)}
                       autoFocus
                       required
                       style={{ paddingLeft: '40px', paddingRight: '40px' }}
                     />
-                    <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-purple)' }} />
+                    <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-yellow)' }} />
                     
                     <button 
                       type="button" 
@@ -355,7 +355,7 @@ const IndexPage = () => {
                 </div>
 
                 {pinError && (
-                  <div style={{ color: '#fca5a5', fontSize: '0.85rem', background: 'rgba(239, 68, 68, 0.15)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ color: 'var(--color-yellow)', fontSize: '0.85rem', background: 'rgba(245, 194, 59, 0.15)', border: '1px solid var(--color-yellow)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
                     {pinError}
                   </div>
                 )}
@@ -398,9 +398,9 @@ export default IndexPage;
 
 export const Head = () => (
   <>
-    <title>Nipo Food - Cardápio & Marmitas da República</title>
-    <meta name="description" content="Aplicativo PWA de gestão diária de refeições e marmitas da república Nipo Food." />
-    <meta name="theme-color" content="#6B4C85" />
+    <title>NipoFood - Cardápio & Marmitas da República</title>
+    <meta name="description" content="Aplicativo PWA de gestão diária de refeições e marmitas da república NipoFood." />
+    <meta name="theme-color" content="#4A2E63" />
     <link rel="icon" href="/icon.jpg" />
   </>
 );
