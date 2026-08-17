@@ -13,11 +13,11 @@ const DEFAULT_MENU = {
   date: 'Segunda-feira, 17 de Agosto',
   mainDish: 'Strogonoff de Frango Especial & Yakisoba Tradicional',
   sides: 'Arroz Branco, Batata Palha Crocante, Salada Sunomono de Pepino e Tomate',
-  notes: 'Refeição servida às 12:30h. Inscrições e alterações encerram diariamente às 10:01h!'
+  notes: 'Pedidos somente até 10h!'
 };
 
 const DEFAULT_ORDERS = [
-  { id: 'edgar', name: 'Edgar', meals: 1, boxes: 1, note: '1 marmita para o jantar', updatedAt: '09:15' },
+  { id: 'edgar', name: 'Edgar', meals: 1, boxes: 1, note: '1 marmita para levar', updatedAt: '09:15' },
   { id: 'lucas', name: 'Lucas', meals: 1, boxes: 0, note: '', updatedAt: '09:20' },
   { id: 'marina', name: 'Marina', meals: 0, boxes: 2, note: 'Deixar na geladeira', updatedAt: '09:45' },
   { id: 'beatriz', name: 'Beatriz', meals: 1, boxes: 0, note: 'Sem cebola', updatedAt: '09:55' }
@@ -33,7 +33,7 @@ const IndexPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [pinError, setPinError] = useState('');
   const [loginSuccessMsg, setLoginSuccessMsg] = useState('');
-  const [deadlineTime, setDeadlineTime] = useState('10:01');
+  const [deadlineTime, setDeadlineTime] = useState('10:00');
 
   // Persistent States
   const [menu, setMenu] = useState(DEFAULT_MENU);
@@ -42,7 +42,14 @@ const IndexPage = () => {
   useEffect(() => {
     try {
       const savedMenu = localStorage.getItem('nipo_food_menu');
-      if (savedMenu) setMenu(JSON.parse(savedMenu));
+      if (savedMenu) {
+        const parsedMenu = JSON.parse(savedMenu);
+        // Overwrite or update notes if it still contains old "servido" text
+        if (parsedMenu.notes && parsedMenu.notes.toLowerCase().includes('servid')) {
+          parsedMenu.notes = 'Pedidos somente até 10h!';
+        }
+        setMenu(parsedMenu);
+      }
 
       const savedOrders = localStorage.getItem('nipo_food_orders');
       if (savedOrders) setOrders(JSON.parse(savedOrders));
@@ -150,7 +157,6 @@ const IndexPage = () => {
     setOrders([]);
   };
 
-  // Check if deadline (10:01 AM by default) is reached
   const checkDeadlinePassed = () => {
     if (!deadlineTime) return false;
     const now = new Date();
@@ -248,7 +254,7 @@ const IndexPage = () => {
             🍱 <strong>Nipo Food</strong> • Cardápio & Marmitas da República
           </p>
           <p style={{ fontSize: '0.75rem' }}>
-            Inscrições e alterações bloqueadas a partir das {deadlineTime}h.
+            Pedidos somente até 10h.
           </p>
         </footer>
 
@@ -289,7 +295,7 @@ const IndexPage = () => {
                 Login de Gerenciador
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Digite sua senha ou PIN de acesso para gerenciar o cardápio e a lista sem bloqueios.
+                Digite sua senha ou PIN de acesso para gerenciar o cardápio e a lista.
               </p>
             </div>
 
