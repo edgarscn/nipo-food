@@ -111,7 +111,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
             <input 
               type="text" 
               className="input-field" 
-              placeholder={isDisabled ? `Inscrições bloqueadas desde às ${deadlineTime}h` : "Ex: Edgar, Lucas, Marina..."} 
+              placeholder={isDisabled ? `Inscrições bloqueadas desde às ${deadlineTime}h` : "Digite seu nome..."} 
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               required={!isDisabled}
@@ -237,7 +237,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
 
         </div>
 
-        {/* Note */}
+        {/* Note (Placeholder cleaned without examples) */}
         <div>
           <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px', display: 'block' }}>
             Observação (Opcional)
@@ -246,7 +246,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
             <input 
               type="text" 
               className="input-field" 
-              placeholder="Ex: Chego 13h / Sem salada" 
+              placeholder="Observação..." 
               value={note} 
               onChange={(e) => setNote(e.target.value)} 
               disabled={isDisabled}
