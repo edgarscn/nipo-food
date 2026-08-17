@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Search, Trash2, Edit2, Utensils, Box, Clock, UserCheck, MessageSquare } from 'lucide-react';
+import { Search, Trash2, Edit2, Utensils, Box, Clock, MessageSquare, Lock } from 'lucide-react';
 
-const OrderList = ({ orders, onDeleteOrder, onEditOrder, isManager }) => {
+const OrderList = ({ orders, onDeleteOrder, onEditOrder, isManager, isOrderDeadlinePassed, deadlineTime = "10:01" }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredOrders = orders.filter(o => 
     o.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (o.note && o.note.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const isActionsLocked = isOrderDeadlinePassed && !isManager;
 
   return (
     <div className="glass-panel animate-fade-in" style={{
@@ -28,7 +30,13 @@ const OrderList = ({ orders, onDeleteOrder, onEditOrder, isManager }) => {
             📋 Lista de Confirmados do Dia ({orders.length})
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-            Moradores que solicitaram refeição ou marmita hoje
+            {isActionsLocked ? (
+              <span style={{ color: '#fbbf24', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                <Lock size={13} /> Alterações e exclusões bloqueadas desde às {deadlineTime}h
+              </span>
+            ) : (
+              "Moradores que solicitaram refeição ou marmita hoje"
+            )}
           </p>
         </div>
 
@@ -64,7 +72,7 @@ const OrderList = ({ orders, onDeleteOrder, onEditOrder, isManager }) => {
             {searchTerm ? "Nenhum resultado encontrado" : "Nenhum pedido na lista ainda"}
           </h4>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            {searchTerm ? "Tente buscar por outro nome." : "Utilize o formulário acima para colocar seu nome e garantir seu almoço/jantar!"}
+            {searchTerm ? "Tente buscar por outro nome." : "Moradores podem se inscrever até o horário limite das " + deadlineTime + "h."}
           </p>
         </div>
       ) : (
@@ -120,39 +128,45 @@ const OrderList = ({ orders, onDeleteOrder, onEditOrder, isManager }) => {
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    {onEditOrder && (
+                  {/* Actions (Locked when deadline passed unless Manager) */}
+                  {!isActionsLocked ? (
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      {onEditOrder && (
+                        <button
+                          onClick={() => onEditOrder(order)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--text-muted)',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            borderRadius: '4px'
+                          }}
+                          title="Editar pedido"
+                        >
+                          <Edit2 size={15} />
+                        </button>
+                      )}
                       <button
-                        onClick={() => onEditOrder(order)}
+                        onClick={() => onDeleteOrder(order.name)}
                         style={{
                           background: 'transparent',
                           border: 'none',
-                          color: 'var(--text-muted)',
+                          color: 'rgba(239, 68, 68, 0.7)',
                           cursor: 'pointer',
                           padding: '4px',
                           borderRadius: '4px'
                         }}
-                        title="Editar pedido"
+                        title="Remover pedido da lista"
                       >
-                        <Edit2 size={15} />
+                        <Trash2 size={15} />
                       </button>
-                    )}
-                    <button
-                      onClick={() => onDeleteOrder(order.name)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'rgba(239, 68, 68, 0.7)',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        borderRadius: '4px'
-                      }}
-                      title="Remover pedido da lista"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
+                    </div>
+                  ) : (
+                    <span title={`Exclusão bloqueada após às ${deadlineTime}h`} style={{ color: 'var(--text-muted)', padding: '4px' }}>
+                      <Lock size={14} />
+                    </span>
+                  )}
                 </div>
 
                 {/* Items Badges */}

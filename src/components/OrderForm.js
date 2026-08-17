@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { User, Utensils, Box, Plus, CheckCircle, MessageSquare } from 'lucide-react';
+import { User, Utensils, Box, Plus, CheckCircle, MessageSquare, Lock } from 'lucide-react';
 
-const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePassed }) => {
+const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePassed, isManager, deadlineTime = "10:01" }) => {
   const [name, setName] = useState('');
   const [meals, setMeals] = useState(1);
   const [boxes, setBoxes] = useState(0);
   const [note, setNote] = useState('');
   const [submittedMessage, setSubmittedMessage] = useState('');
 
+  const isDisabled = isOrderDeadlinePassed && !isManager;
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isDisabled) return;
     const cleanName = name.trim();
     if (!cleanName) return;
 
@@ -25,31 +28,59 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
     setSubmittedMessage(`Pedido de ${cleanName} gravado com sucesso!`);
     setTimeout(() => setSubmittedMessage(''), 3000);
 
-    // Reset inputs except keep name for easy reference
     setMeals(1);
     setBoxes(0);
     setNote('');
   };
 
   const handleSelectExistingName = (selectedName) => {
-    setName(selectedName);
+    if (!isDisabled) {
+      setName(selectedName);
+    }
   };
 
   return (
     <div className="glass-panel animate-fade-in" style={{
       marginBottom: '24px',
-      padding: '24px'
+      padding: '24px',
+      opacity: isDisabled ? 0.9 : 1
     }}>
-      <h3 style={{
-        fontSize: '1.25rem',
-        marginBottom: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        color: 'var(--text-primary)'
-      }}>
-        ✍️ Colocar Nome na Lista
-      </h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h3 style={{
+          fontSize: '1.25rem',
+          margin: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'var(--text-primary)'
+        }}>
+          ✍️ Colocar Nome na Lista
+        </h3>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          Horário Limite: <strong>{deadlineTime}h</strong>
+        </span>
+      </div>
+
+      {/* Deadline Passed Alert */}
+      {isDisabled && (
+        <div style={{
+          background: 'rgba(245, 158, 11, 0.15)',
+          border: '1px solid rgba(245, 158, 11, 0.3)',
+          color: '#fbbf24',
+          padding: '12px 16px',
+          borderRadius: 'var(--radius-md)',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '0.875rem'
+        }}>
+          <Lock size={20} style={{ flexShrink: 0 }} />
+          <span>
+            <strong>Inscrições Encerradas ({deadlineTime}h)</strong>: Não é mais possível incluir novos pedidos para a refeição de hoje. Fale com o gerenciador se precisar de exceção.
+          </span>
+        </div>
+      )}
 
       {submittedMessage && (
         <div style={{
@@ -80,17 +111,18 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
             <input 
               type="text" 
               className="input-field" 
-              placeholder="Ex: Edgar, Lucas, Marina..." 
+              placeholder={isDisabled ? `Inscrições bloqueadas desde às ${deadlineTime}h` : "Ex: Edgar, Lucas, Marina..."} 
               value={name} 
               onChange={(e) => setName(e.target.value)} 
-              required 
-              style={{ paddingLeft: '40px' }}
+              required={!isDisabled}
+              disabled={isDisabled}
+              style={{ paddingLeft: '40px', opacity: isDisabled ? 0.6 : 1 }}
             />
             <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-purple)' }} />
           </div>
 
-          {/* Quick Name Pills if available */}
-          {existingNames.length > 0 && !name && (
+          {/* Quick Name Pills if available and enabled */}
+          {existingNames.length > 0 && !name && !isDisabled && (
             <div style={{ marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sugestões:</span>
               {existingNames.slice(0, 5).map(n => (
@@ -119,7 +151,8 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px'
+          gap: '16px',
+          opacity: isDisabled ? 0.6 : 1
         }}>
           
           {/* Refeições no local */}
@@ -140,6 +173,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                   <button
                     key={num}
                     type="button"
+                    disabled={isDisabled}
                     onClick={() => setMeals(num)}
                     style={{
                       width: '36px',
@@ -149,7 +183,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                       background: meals === num ? 'rgba(168, 85, 247, 0.25)' : 'rgba(255, 255, 255, 0.05)',
                       color: meals === num ? '#ffffff' : 'var(--text-secondary)',
                       fontWeight: 700,
-                      cursor: 'pointer',
+                      cursor: isDisabled ? 'not-allowed' : 'pointer',
                       transition: 'all 0.15s ease'
                     }}
                   >
@@ -179,6 +213,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                   <button
                     key={num}
                     type="button"
+                    disabled={isDisabled}
                     onClick={() => setBoxes(num)}
                     style={{
                       width: '36px',
@@ -188,7 +223,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
                       background: boxes === num ? 'rgba(249, 115, 22, 0.25)' : 'rgba(255, 255, 255, 0.05)',
                       color: boxes === num ? '#ffffff' : 'var(--text-secondary)',
                       fontWeight: 700,
-                      cursor: 'pointer',
+                      cursor: isDisabled ? 'not-allowed' : 'pointer',
                       transition: 'all 0.15s ease'
                     }}
                   >
@@ -202,7 +237,7 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
 
         </div>
 
-        {/* Note / Special instructions */}
+        {/* Note */}
         <div>
           <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px', display: 'block' }}>
             Observação (Opcional)
@@ -211,10 +246,11 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
             <input 
               type="text" 
               className="input-field" 
-              placeholder="Ex: Chego 13h / Sem salada / Guardar marmita na geladeira" 
+              placeholder="Ex: Chego 13h / Sem salada" 
               value={note} 
               onChange={(e) => setNote(e.target.value)} 
-              style={{ paddingLeft: '40px' }}
+              disabled={isDisabled}
+              style={{ paddingLeft: '40px', opacity: isDisabled ? 0.6 : 1 }}
             />
             <MessageSquare size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-teal)' }} />
           </div>
@@ -223,11 +259,22 @@ const OrderForm = ({ onAddOrUpdateOrder, existingNames = [], isOrderDeadlinePass
         {/* Submit Button */}
         <button 
           type="submit" 
-          className="btn btn-primary"
-          style={{ width: '100%', padding: '14px', fontSize: '1rem', marginTop: '4px' }}
-          disabled={isOrderDeadlinePassed}
+          className={isDisabled ? "btn btn-secondary" : "btn btn-primary"}
+          style={{ 
+            width: '100%', 
+            padding: '14px', 
+            fontSize: '1rem', 
+            marginTop: '4px',
+            opacity: isDisabled ? 0.6 : 1,
+            cursor: isDisabled ? 'not-allowed' : 'pointer'
+          }}
+          disabled={isDisabled}
         >
-          <Plus size={20} /> Confimar Pedido na Lista 🍱
+          {isDisabled ? (
+            <> <Lock size={18} /> Inscrições Bloqueadas ({deadlineTime}h) </>
+          ) : (
+            <> <Plus size={20} /> Confirmar Pedido na Lista 🍱 </>
+          )}
         </button>
 
       </form>
