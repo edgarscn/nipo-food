@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import MenuCard from '../components/MenuCard';
 import KitchenSummary from '../components/KitchenSummary';
@@ -7,6 +7,8 @@ import OrderList from '../components/OrderList';
 import ManagerModal from '../components/ManagerModal';
 import { KeyRound, Lock, Eye, EyeOff, ShieldCheck, LogIn, CheckCircle } from 'lucide-react';
 import '../styles/global.css';
+
+const SYNC_API_ENDPOINT = "https://crudcrud.com/api/0d86e4ce35d54ea0b93874debef123fb/nipofood_state";
 
 const DEFAULT_MENU = {
   mealType: 'Almoço',
@@ -38,6 +40,7 @@ const IndexPage = () => {
   // Persistent States
   const [menu, setMenu] = useState(DEFAULT_MENU);
   const [orders, setOrders] = useState(DEFAULT_ORDERS);
+  const lastSyncTimestamp = useRef(0);
 
   // Force PWA Service Worker to update fresh bundles
   useEffect(() => {
@@ -50,6 +53,7 @@ const IndexPage = () => {
     }
   }, []);
 
+  // Initial Load from localStorage
   useEffect(() => {
     try {
       const savedMenu = localStorage.getItem('nipo_food_menu');
@@ -78,6 +82,63 @@ const IndexPage = () => {
     } catch (e) {
       console.error("Erro ao carregar dados do localStorage", e);
     }
+  }, []);
+
+  // Real-Time Sync Polling across all devices (PC, Phone, Tablet)
+  const fetchCloudState = async () => {
+    try {
+      const res = await fetch(SYNC_API_ENDPOINT);
+      if (!res.ok) return;
+      const dataArray = await res.json();
+      if (Array.isArray(dataArray) && dataArray.length > 0) {
+        const latestCloudState = dataArray[dataArray.length - 1];
+        if (latestCloudState && latestCloudState.updatedAt > lastSyncTimestamp.current) {
+          lastSyncTimestamp.current = latestCloudState.updatedAt;
+          if (latestCloudState.orders) {
+            setOrders(latestCloudState.orders);
+            localStorage.setItem('nipo_food_orders', JSON.stringify(latestCloudState.orders));
+          }
+          if (latestCloudState.menu) {
+            setMenu(latestCloudState.menu);
+            localStorage.setItem('nipo_food_menu', JSON.stringify(latestCloudState.menu));
+          }
+          if (latestCloudState.deadlineTime) {
+            setDeadlineTime(latestCloudState.deadlineTime);
+            localStorage.setItem('nipo_food_deadline', latestCloudState.deadlineTime);
+          }
+        }
+      }
+    } catch (e) {}
+  };
+
+  // Push local updates to Cloud Sync Endpoint
+  const syncToCloud = async (newOrders, newMenu, newDeadline) => {
+    const timestamp = Date.now();
+    lastSyncTimestamp.current = timestamp;
+    const payload = {
+      orders: newOrders !== undefined ? newOrders : orders,
+      menu: newMenu !== undefined ? newMenu : menu,
+      deadlineTime: newDeadline !== undefined ? newDeadline : deadlineTime,
+      updatedAt: timestamp
+    };
+    try {
+      await fetch(SYNC_API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    fetchCloudState();
+    const interval = setInterval(fetchCloudState, 4000);
+    const handleFocus = () => fetchCloudState();
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   useEffect(() => {
@@ -152,21 +213,39 @@ const IndexPage = () => {
   const handleAddOrUpdateOrder = (newOrder) => {
     setOrders(prev => {
       const index = prev.findIndex(o => o.name.toLowerCase() === newOrder.name.toLowerCase());
+      let updated;
       if (index >= 0) {
-        const updated = [...prev];
+        updated = [...prev];
         updated[index] = { ...updated[index], ...newOrder };
-        return updated;
+      } else {
+        updated = [newOrder, ...prev];
       }
-      return [newOrder, ...prev];
+      syncToCloud(updated, undefined, undefined);
+      return updated;
     });
   };
 
   const handleDeleteOrder = (nameToDelete) => {
-    setOrders(prev => prev.filter(o => o.name.toLowerCase() !== nameToDelete.toLowerCase()));
+    setOrders(prev => {
+      const updated = prev.filter(o => o.name.toLowerCase() !== nameToDelete.toLowerCase());
+      syncToCloud(updated, undefined, undefined);
+      return updated;
+    });
   };
 
   const handleResetOrders = () => {
     setOrders([]);
+    syncToCloud([], undefined, undefined);
+  };
+
+  const handleUpdateMenu = (newMenu) => {
+    setMenu(newMenu);
+    syncToCloud(undefined, newMenu, undefined);
+  };
+
+  const handleUpdateDeadline = (newDeadline) => {
+    setDeadlineTime(newDeadline);
+    syncToCloud(undefined, undefined, newDeadline);
   };
 
   const checkDeadlinePassed = () => {
@@ -223,7 +302,7 @@ const IndexPage = () => {
         {/* Cardápio do Dia */}
         <MenuCard 
           menu={menu} 
-          setMenu={setMenu} 
+          setMenu={handleUpdateMenu} 
           isManager={isManager}
           isOrderDeadlinePassed={isOrderDeadlinePassed}
         />
