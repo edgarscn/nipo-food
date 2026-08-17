@@ -3,11 +3,11 @@ import { Utensils, Edit3, Calendar, Clock, Sparkles, Check, AlertCircle } from '
 
 const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...menu });
+  const [formData, setFormData] = useState({ ...menu, mealType: 'Almoço' });
 
   const handleSave = (e) => {
     e.preventDefault();
-    setMenu(formData);
+    setMenu({ ...formData, mealType: 'Almoço' });
     setIsEditing(false);
   };
 
@@ -18,7 +18,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Visual Ambient Glow */}
+      {/* Ambient Glow */}
       <div style={{
         position: 'absolute',
         top: '-40px',
@@ -44,7 +44,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
             gap: '6px',
             boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)'
           }}>
-            <Sparkles size={14} /> {menu.mealType || 'Almoço'} do Dia
+            <Sparkles size={14} /> Almoço do Dia ☀️
           </span>
 
           <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -54,11 +54,11 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
 
         {isManager && !isEditing && (
           <button 
-            onClick={() => { setFormData({ ...menu }); setIsEditing(true); }}
+            onClick={() => { setFormData({ ...menu, mealType: 'Almoço' }); setIsEditing(true); }}
             className="btn btn-secondary"
             style={{ padding: '6px 14px', fontSize: '0.85rem' }}
           >
-            <Edit3 size={15} /> Editar Cardápio
+            <Edit3 size={15} /> Editar Almoço
           </button>
         )}
       </div>
@@ -66,32 +66,17 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
       {/* Editing Form (Manager Mode) */}
       {isEditing ? (
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--accent-purple)' }}>Atualizar Cardápio de Hoje</h3>
+          <h3 style={{ fontSize: '1.1rem', color: 'var(--accent-purple)' }}>Atualizar Almoço de Hoje ☀️</h3>
           
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '160px' }}>
-              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Refeição</label>
-              <select 
-                className="input-field" 
-                value={formData.mealType} 
-                onChange={(e) => setFormData({ ...formData, mealType: e.target.value })}
-              >
-                <option value="Almoço">Almoço ☀️</option>
-                <option value="Jantar">Jantar 🌙</option>
-                <option value="Especial">Refeição Especial 🍣</option>
-              </select>
-            </div>
-
-            <div style={{ flex: 2, minWidth: '200px' }}>
-              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Data / Exibição</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                value={formData.date} 
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                placeholder="Ex: Quarta-feira, 12 de Agosto"
-              />
-            </div>
+          <div>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px', display: 'block' }}>Data / Exibição</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              value={formData.date} 
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              placeholder="Ex: Segunda-feira, 17 de Agosto"
+            />
           </div>
 
           <div>
@@ -113,7 +98,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
               className="input-field" 
               value={formData.sides} 
               onChange={(e) => setFormData({ ...formData, sides: e.target.value })}
-              placeholder="Ex: Arroz Branco, Feijão Carioca, Batata Palha, Salada Tropical"
+              placeholder="Ex: Arroz Branco, Feijão Carioca, Batata Palha, Salada Sunomono"
             />
           </div>
 
@@ -124,7 +109,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
               className="input-field" 
               value={formData.notes} 
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Ex: Servido a partir das 12:30h. Favor confirmar até 11:30h."
+              placeholder="Ex: Almoço servido às 12:30h. Confirmar até às 10:01h!"
             />
           </div>
 
@@ -133,7 +118,7 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
               Cancelar
             </button>
             <button type="submit" className="btn btn-sunset">
-              <Check size={16} /> Salvar Cardápio
+              <Check size={16} /> Salvar Almoço
             </button>
           </div>
         </form>
@@ -173,18 +158,18 @@ const MenuCard = ({ menu, setMenu, isManager, isOrderDeadlinePassed }) => {
           {isOrderDeadlinePassed && (
             <div style={{
               marginTop: '12px',
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
               padding: '10px 14px',
               borderRadius: 'var(--radius-md)',
-              color: '#fca5a5',
+              color: '#fbbf24',
               fontSize: '0.875rem',
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
             }}>
               <AlertCircle size={16} />
-              <span>Horário limite de pedidos atingido. Novos pedidos exigem autorização do gerenciador.</span>
+              <span>Horário limite de 10:01h atingido. Alterações apenas via gerenciador.</span>
             </div>
           )}
         </div>

@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Utensils, Box, Users, Share2, Check, Copy } from 'lucide-react';
+import { Utensils, Box, Users, Share2, Check } from 'lucide-react';
 
 const KitchenSummary = ({ orders, menu }) => {
   const [copied, setCopied] = useState(false);
 
-  // Calculate totals
   const totalMeals = orders.reduce((sum, order) => sum + (Number(order.meals) || 0), 0);
   const totalBoxes = orders.reduce((sum, order) => sum + (Number(order.boxes) || 0), 0);
   const totalPeople = orders.length;
 
   const handleCopyWhatsApp = () => {
-    let summaryText = `🍱 *NIPO FOOD - CARDÁPIO & REFEIÇÕES* 🍱\n`;
-    summaryText += `🗓️ *${menu.mealType || 'Refeição'} - ${menu.date || 'Hoje'}*\n`;
-    summaryText += `🍲 *Cardápio:* ${menu.mainDish || 'Prato do Dia'}\n`;
+    let summaryText = `🍱 *NIPO FOOD - ALMOÇO DO DIA* 🍱\n`;
+    summaryText += `🗓️ *${menu.date || 'Hoje'}*\n`;
+    summaryText += `🍲 *Prato:* ${menu.mainDish || 'Prato do Dia'}\n`;
     if (menu.sides) summaryText += `🥗 *Acompanhamentos:* ${menu.sides}\n`;
     summaryText += `\n📊 *RESUMO DA COZINHA:*\n`;
     summaryText += `• 🍽️ *Refeições no Local:* ${totalMeals}\n`;
@@ -52,7 +51,7 @@ const KitchenSummary = ({ orders, menu }) => {
         gap: '12px'
       }}>
         <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          📊 Totais para a Cozinha
+          📊 Totais do Almoço para a Cozinha
         </h3>
 
         <button 
