@@ -39,6 +39,17 @@ const IndexPage = () => {
   const [menu, setMenu] = useState(DEFAULT_MENU);
   const [orders, setOrders] = useState(DEFAULT_ORDERS);
 
+  // Force PWA Service Worker to update fresh bundles
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.update();
+        }
+      });
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const savedMenu = localStorage.getItem('nipo_food_menu');
@@ -122,10 +133,11 @@ const IndexPage = () => {
     setIsManagerModalOpen(false);
   };
 
-  // Fixed PIN validation: Only accepts current active managerPin
+  // Strict single active PIN validation directly from state / localStorage
   const handleVerifyPin = (e) => {
     e.preventDefault();
-    if (inputPin.trim() === managerPin.trim()) {
+    const activePin = (localStorage.getItem('nipo_food_pin') || managerPin).trim();
+    if (inputPin.trim() === activePin) {
       setLoginSuccessMsg('Login realizado com sucesso!');
       setTimeout(() => {
         setIsManager(true);

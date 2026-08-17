@@ -3,7 +3,7 @@
   publish = "public"
 
 [site]
-  site_id = "8ff6373c-d5f7-4fee-ba66-a27c8b89dc04"
+  site_id = "981bad98-d237-4f72-a194-52bae2e4cd45"
 
 [[redirects]]
   from = "/*"

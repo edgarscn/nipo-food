@@ -20,8 +20,12 @@ const ManagerModal = ({
 
   const handleChangePin = (e) => {
     e.preventDefault();
-    if (newPin.trim().length >= 4) {
-      setManagerPin(newPin.trim());
+    const cleanPin = newPin.trim();
+    if (cleanPin.length >= 4) {
+      try {
+        localStorage.setItem('nipo_food_pin', cleanPin);
+      } catch (err) {}
+      setManagerPin(cleanPin);
       setNewPin('');
       setPinSuccess(true);
       setTimeout(() => setPinSuccess(false), 2500);
