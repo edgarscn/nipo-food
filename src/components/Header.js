@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { LogIn, LogOut, ShieldCheck, Sun, Moon, Wifi, WifiOff, Smartphone } from 'lucide-react';
-import logoImg from '../images/logo.jpg';
+import { Waves, Sun, Moon, Wifi, Smartphone, User, RefreshCw, Clock } from 'lucide-react';
 
-const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManagerAccess }) => {
-  const [isOnline, setIsOnline] = useState(true);
+const Header = ({ 
+  currentUserName, 
+  onEditUserName, 
+  theme, 
+  toggleTheme, 
+  currentTime, 
+  isSyncing, 
+  onManualRefresh 
+}) => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [canInstallPWA, setCanInstallPWA] = useState(false);
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    setIsOnline(navigator.onLine);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -22,10 +21,7 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
@@ -42,89 +38,99 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
     }
   };
 
+  const formattedTime = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const formattedDate = currentTime.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
   return (
-    <header style={{
-      marginBottom: '24px',
+    <header className="glass-panel animate-fade-in" style={{
+      marginBottom: '20px',
       padding: '20px 24px',
       display: 'flex',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
       alignItems: 'center',
       gap: '16px'
-    }} className="glass-panel animate-fade-in">
+    }}>
       
-      {/* Brand Identity with 3-color palette */}
+      {/* Brand & Digital Clock */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <img 
-          src={logoImg} 
-          alt="Logo NipoFood" 
-          style={{
-            width: '60px',
-            height: '60px',
-            borderRadius: '16px',
-            objectFit: 'cover',
-            border: '2px solid var(--color-yellow)',
-            boxShadow: '0 4px 14px rgba(245, 194, 59, 0.35)'
-          }}
-        />
+        <div style={{
+          width: '54px',
+          height: '54px',
+          borderRadius: '16px',
+          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#FFFFFF',
+          boxShadow: '0 4px 16px rgba(0, 180, 216, 0.4)',
+          flexShrink: 0
+        }}>
+          <Waves size={28} />
+        </div>
+
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h1 style={{ fontSize: '1.8rem', margin: 0, color: 'var(--color-yellow)' }}>
-              NipoFood
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <h1 style={{ fontSize: '1.6rem', margin: 0, color: 'var(--color-primary)', letterSpacing: '-0.02em' }}>
+              Nipo Lavanderia
             </h1>
-            {isManager && (
-              <span style={{
-                background: 'var(--color-blue)',
-                color: '#FFFFFF',
-                border: '1px solid var(--color-yellow)',
-                padding: '2px 10px',
-                borderRadius: '12px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <ShieldCheck size={13} color="var(--color-yellow)" /> Gerenciador
-              </span>
-            )}
+            
+            {/* Live Clock Pill */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              background: 'rgba(0, 180, 216, 0.15)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '20px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              color: 'var(--color-primary)'
+            }}>
+              <Clock size={13} />
+              <span>{formattedTime}</span>
+            </div>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
-            Cardápio & Marmitas da República
+
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '2px 0 0 0', textTransform: 'capitalize' }}>
+            {formattedDate} • Máquinas 1, 2 e 4
           </p>
         </div>
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      {/* Action Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
         
-        {/* Connection Status Badge (Blue / Yellow) */}
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '6px 12px',
-          borderRadius: '20px',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          background: isOnline ? 'rgba(30, 101, 181, 0.25)' : 'rgba(245, 194, 59, 0.25)',
-          color: isOnline ? '#FFFFFF' : 'var(--color-yellow)',
-          border: `1px solid ${isOnline ? 'var(--color-blue)' : 'var(--color-yellow)'}`
-        }} title={isOnline ? "Conectado" : "Modo Offline PWA Ativo"}>
-          {isOnline ? <Wifi size={14} color="var(--color-yellow)" /> : <WifiOff size={14} />}
-          {isOnline ? "Online" : "Offline"}
-        </span>
+        {/* User Identity Pill */}
+        <button 
+          onClick={onEditUserName}
+          className="btn btn-secondary"
+          style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: '20px' }}
+          title="Clique para alterar seu nome"
+        >
+          <User size={15} color="var(--color-primary)" />
+          <span>{currentUserName ? currentUserName : "Definir meu nome"}</span>
+        </button>
+
+        {/* Sync Indicator / Refresh */}
+        <button
+          onClick={onManualRefresh}
+          className="btn btn-secondary"
+          style={{ width: '38px', height: '38px', padding: 0, borderRadius: '50%' }}
+          title={isSyncing ? "Sincronizando..." : "Atualizar dados da nuvem"}
+        >
+          <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} color="var(--color-primary)" />
+        </button>
 
         {/* PWA Install Button */}
         {canInstallPWA && (
           <button 
             onClick={handleInstallPWA} 
             className="btn btn-primary"
-            style={{ padding: '8px 14px', fontSize: '0.85rem' }}
+            style={{ padding: '6px 12px', fontSize: '0.85rem' }}
           >
-            <Smartphone size={16} /> Instalar PWA
+            <Smartphone size={15} /> Instalar App
           </button>
         )}
 
@@ -132,31 +138,11 @@ const Header = ({ isManager, onLogoutManager, theme, toggleTheme, onRequestManag
         <button 
           onClick={toggleTheme}
           className="btn btn-secondary"
-          style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}
+          style={{ width: '38px', height: '38px', padding: 0, borderRadius: '50%' }}
           title={theme === 'dark' ? "Modo Claro" : "Modo Escuro"}
         >
-          {theme === 'dark' ? <Sun size={18} color="var(--color-yellow)" /> : <Moon size={18} color="#FFFFFF" />}
+          {theme === 'dark' ? <Sun size={17} color="#F59E0B" /> : <Moon size={17} color="var(--color-primary)" />}
         </button>
-
-        {/* Login / Logout Button */}
-        {isManager ? (
-          <button 
-            onClick={onLogoutManager}
-            className="btn btn-secondary"
-            style={{ fontSize: '0.85rem', color: 'var(--color-yellow)', border: '1px solid var(--color-yellow)' }}
-            title="Sair do modo gerenciador"
-          >
-            <LogOut size={16} /> Sair (Logout)
-          </button>
-        ) : (
-          <button 
-            onClick={onRequestManagerAccess}
-            className="btn btn-primary"
-            style={{ fontSize: '0.85rem' }}
-          >
-            <LogIn size={16} /> Login Gerenciador
-          </button>
-        )}
 
       </div>
 

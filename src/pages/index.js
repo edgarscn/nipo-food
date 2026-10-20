@@ -1,48 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
-import MenuCard from '../components/MenuCard';
-import KitchenSummary from '../components/KitchenSummary';
-import OrderForm from '../components/OrderForm';
-import OrderList from '../components/OrderList';
-import ManagerModal from '../components/ManagerModal';
-import { KeyRound, Lock, Eye, EyeOff, ShieldCheck, LogIn, CheckCircle } from 'lucide-react';
+import RulesBanner from '../components/RulesBanner';
+import MachineColumn from '../components/MachineColumn';
+import BookingModal from '../components/BookingModal';
+import UserNameModal from '../components/UserNameModal';
+import ActionBar from '../components/ActionBar';
 import '../styles/global.css';
 
-const SYNC_API_ENDPOINT = "https://crudcrud.com/api/0d86e4ce35d54ea0b93874debef123fb/nipofood_state";
+const SYNC_API_ENDPOINT = "https://api.restful-api.dev/objects/ff808181a09d98f701a1594354602d55";
+const MACHINES = [1, 2, 4];
+const TIMES = ["08:00", "14:00", "21:00"];
 
-const DEFAULT_MENU = {
-  mealType: 'Almoço',
-  date: 'Segunda-feira, 17 de Agosto',
-  mainDish: 'Strogonoff de Frango Especial & Yakisoba Tradicional',
-  sides: 'Arroz Branco, Batata Palha Crocante, Salada Sunomono de Pepino e Tomate',
-  notes: 'Pedidos somente até 10h!'
+const SLOT_MINUTES = {
+  "08:00": 480,
+  "14:00": 840,
+  "21:00": 1260
 };
-
-const DEFAULT_ORDERS = [
-  { id: 'edgar', name: 'Edgar', meals: 1, boxes: 1, note: '1 marmita para levar', updatedAt: '09:15' },
-  { id: 'lucas', name: 'Lucas', meals: 1, boxes: 0, note: '', updatedAt: '09:20' },
-  { id: 'marina', name: 'Marina', meals: 0, boxes: 2, note: 'Deixar na geladeira', updatedAt: '09:45' },
-  { id: 'beatriz', name: 'Beatriz', meals: 1, boxes: 0, note: 'Sem cebola', updatedAt: '09:55' }
-];
 
 const IndexPage = () => {
   const [theme, setTheme] = useState('dark');
-  const [isManager, setIsManager] = useState(false);
-  const [managerPin, setManagerPin] = useState('1234');
-  const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
-  const [pinPromptOpen, setPinPromptOpen] = useState(false);
-  const [inputPin, setInputPin] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [pinError, setPinError] = useState('');
-  const [loginSuccessMsg, setLoginSuccessMsg] = useState('');
-  const [deadlineTime, setDeadlineTime] = useState('10:00');
+  const [currentUserName, setCurrentUserName] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [slots, setSlots] = useState({});
+  const [boardDate, setBoardDate] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  // Persistent States
-  const [menu, setMenu] = useState(DEFAULT_MENU);
-  const [orders, setOrders] = useState(DEFAULT_ORDERS);
+  // Modals
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [targetSlot, setTargetSlot] = useState(null);
+  const [userNameModalOpen, setUserNameModalOpen] = useState(false);
+
   const lastSyncTimestamp = useRef(0);
 
-  // Force PWA Service Worker to update fresh bundles
+  // 1. Force PWA Service Worker to update fresh bundles
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -53,432 +43,335 @@ const IndexPage = () => {
     }
   }, []);
 
-  // Initial Load from localStorage
+  // 2. Load LocalStorage on Mount
   useEffect(() => {
     try {
-      const savedMenu = localStorage.getItem('nipo_food_menu');
-      if (savedMenu) {
-        const parsedMenu = JSON.parse(savedMenu);
-        if (parsedMenu.notes && parsedMenu.notes.toLowerCase().includes('servid')) {
-          parsedMenu.notes = 'Pedidos somente até 10h!';
-        }
-        setMenu(parsedMenu);
+      const savedTheme = localStorage.getItem('nipo_laundry_theme') || 'dark';
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+
+      const savedUser = localStorage.getItem('nipo_laundry_user_name') || '';
+      setCurrentUserName(savedUser);
+
+      const savedDate = localStorage.getItem('nipo_laundry_date');
+      const savedSlots = localStorage.getItem('nipo_laundry_slots');
+
+      const today = new Date().toLocaleDateString('pt-BR');
+      if (savedDate === today && savedSlots) {
+        setBoardDate(savedDate);
+        setSlots(JSON.parse(savedSlots));
+      } else {
+        setBoardDate(today);
+        setSlots({});
       }
-
-      const savedOrders = localStorage.getItem('nipo_food_orders');
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
-
-      const savedTheme = localStorage.getItem('nipo_food_theme');
-      if (savedTheme) setTheme(savedTheme);
-
-      const savedPin = localStorage.getItem('nipo_food_pin');
-      if (savedPin) setManagerPin(savedPin);
-
-      const savedDeadline = localStorage.getItem('nipo_food_deadline');
-      if (savedDeadline) setDeadlineTime(savedDeadline);
-
-      const savedManagerAuth = localStorage.getItem('nipo_food_is_manager');
-      if (savedManagerAuth === 'true') setIsManager(true);
     } catch (e) {
-      console.error("Erro ao carregar dados do localStorage", e);
+      console.error("Erro ao carregar dados locais", e);
     }
   }, []);
 
-  // Real-Time Sync Polling across all devices (PC, Phone, Tablet)
+  // 3. Real-Time Cloud Synchronization
   const fetchCloudState = async () => {
     try {
-      const res = await fetch(SYNC_API_ENDPOINT);
+      setIsSyncing(true);
+      const res = await fetch(SYNC_API_ENDPOINT, { cache: 'no-store' });
       if (!res.ok) return;
-      const dataArray = await res.json();
-      if (Array.isArray(dataArray) && dataArray.length > 0) {
-        const latestCloudState = dataArray[dataArray.length - 1];
-        if (latestCloudState && latestCloudState.updatedAt > lastSyncTimestamp.current) {
-          lastSyncTimestamp.current = latestCloudState.updatedAt;
-          if (latestCloudState.orders) {
-            setOrders(latestCloudState.orders);
-            localStorage.setItem('nipo_food_orders', JSON.stringify(latestCloudState.orders));
-          }
-          if (latestCloudState.menu) {
-            setMenu(latestCloudState.menu);
-            localStorage.setItem('nipo_food_menu', JSON.stringify(latestCloudState.menu));
-          }
-          if (latestCloudState.deadlineTime) {
-            setDeadlineTime(latestCloudState.deadlineTime);
-            localStorage.setItem('nipo_food_deadline', latestCloudState.deadlineTime);
-          }
+      const json = await res.json();
+      const cloudData = json.data;
+      if (cloudData && cloudData.updatedAt && cloudData.updatedAt > lastSyncTimestamp.current) {
+        lastSyncTimestamp.current = cloudData.updatedAt;
+        const today = new Date().toLocaleDateString('pt-BR');
+
+        // Check if cloud state is from today or needs daily reset
+        if (cloudData.date === today && cloudData.slots) {
+          setSlots(cloudData.slots);
+          setBoardDate(cloudData.date);
+          localStorage.setItem('nipo_laundry_slots', JSON.stringify(cloudData.slots));
+          localStorage.setItem('nipo_laundry_date', cloudData.date);
+        } else if (cloudData.date !== today) {
+          // Cloud state is from another day, reset for today
+          const freshSlots = {};
+          setSlots(freshSlots);
+          setBoardDate(today);
+          syncToCloud(freshSlots, today);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Erro ao buscar dados na nuvem", e);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
-  // Push local updates to Cloud Sync Endpoint
-  const syncToCloud = async (newOrders, newMenu, newDeadline) => {
+  const syncToCloud = async (newSlots, newDate) => {
     const timestamp = Date.now();
     lastSyncTimestamp.current = timestamp;
+    const dateToSave = newDate || boardDate || new Date().toLocaleDateString('pt-BR');
     const payload = {
-      orders: newOrders !== undefined ? newOrders : orders,
-      menu: newMenu !== undefined ? newMenu : menu,
-      deadlineTime: newDeadline !== undefined ? newDeadline : deadlineTime,
-      updatedAt: timestamp
+      name: "nipo_laundry",
+      data: {
+        date: dateToSave,
+        slots: newSlots,
+        updatedAt: timestamp
+      }
     };
+
     try {
+      setIsSyncing(true);
       await fetch(SYNC_API_ENDPOINT, {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Erro ao sincronizar com nuvem", e);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
+  // 4. Polling & Focus listener
   useEffect(() => {
     fetchCloudState();
-    const interval = setInterval(fetchCloudState, 4000);
+    const interval = setInterval(fetchCloudState, 3500);
     const handleFocus = () => fetchCloudState();
     window.addEventListener('focus', handleFocus);
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [boardDate]);
 
+  // 5. Background Clock & Automated Rules Check (Every 1 second)
   useEffect(() => {
-    try {
-      localStorage.setItem('nipo_food_menu', JSON.stringify(menu));
-    } catch (e) {}
-  }, [menu]);
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('nipo_food_orders', JSON.stringify(orders));
-    } catch (e) {}
-  }, [orders]);
+      const today = now.toLocaleDateString('pt-BR');
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('nipo_food_theme', theme);
-      document.documentElement.setAttribute('data-theme', theme);
-    } catch (e) {}
-  }, [theme]);
+      // RULE 1: Daily Reset at 23:59 or when date changes
+      if (currentMinutes >= 23 * 60 + 59 || (boardDate && boardDate !== today)) {
+        if (Object.keys(slots).length > 0) {
+          const emptySlots = {};
+          setSlots(emptySlots);
+          setBoardDate(today);
+          localStorage.setItem('nipo_laundry_slots', JSON.stringify(emptySlots));
+          localStorage.setItem('nipo_laundry_date', today);
+          syncToCloud(emptySlots, today);
+          return;
+        }
+      }
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('nipo_food_pin', managerPin);
-    } catch (e) {}
-  }, [managerPin]);
+      // RULE 2: Auto-Release unconfirmed slots (Tolerance window: 25 min after slot)
+      let needsAutoRelease = false;
+      const updatedSlots = { ...slots };
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('nipo_food_deadline', deadlineTime);
-    } catch (e) {}
-  }, [deadlineTime]);
+      Object.keys(updatedSlots).forEach(key => {
+        const booking = updatedSlots[key];
+        if (booking && !booking.confirmed) {
+          const parts = key.split('_');
+          const slotTime = parts[1]; // e.g. "08:00"
+          const slotMin = SLOT_MINUTES[slotTime];
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('nipo_food_is_manager', isManager ? 'true' : 'false');
-    } catch (e) {}
-  }, [isManager]);
+          if (slotMin !== undefined) {
+            const windowCloseMin = slotMin + 25; // 25min após o horário marcado
+            // If current time passed windowCloseMin and booking was not confirmed:
+            if (currentMinutes > windowCloseMin) {
+              delete updatedSlots[key];
+              needsAutoRelease = true;
+            }
+          }
+        }
+      });
 
+      if (needsAutoRelease) {
+        setSlots(updatedSlots);
+        localStorage.setItem('nipo_laundry_slots', JSON.stringify(updatedSlots));
+        syncToCloud(updatedSlots);
+      }
+
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [slots, boardDate]);
+
+  // Actions
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('nipo_laundry_theme', nextTheme);
   };
 
-  const handleRequestManagerAccess = () => {
-    setPinPromptOpen(true);
-    setInputPin('');
-    setPinError('');
-    setLoginSuccessMsg('');
+  const handleSaveUserName = (name) => {
+    setCurrentUserName(name);
+    localStorage.setItem('nipo_laundry_user_name', name);
   };
 
-  const handleLogoutManager = () => {
-    setIsManager(false);
-    setIsManagerModalOpen(false);
+  // Open booking modal for slot
+  const handleOpenBookModal = (machineId, time) => {
+    setTargetSlot({ machineId, time });
+    setBookingModalOpen(true);
   };
 
-  // Strict single active PIN validation directly from state / localStorage
-  const handleVerifyPin = (e) => {
-    e.preventDefault();
-    const activePin = (localStorage.getItem('nipo_food_pin') || managerPin).trim();
-    if (inputPin.trim() === activePin) {
-      setLoginSuccessMsg('Login realizado com sucesso!');
-      setTimeout(() => {
-        setIsManager(true);
-        setPinPromptOpen(false);
-        setLoginSuccessMsg('');
-      }, 800);
-    } else {
-      setPinError('Senha/PIN incorreto. Tente novamente.');
+  // Confirm booking submission
+  const handleConfirmBooking = (machineId, time, name) => {
+    handleSaveUserName(name);
+
+    const slotKey = `${machineId}_${time}`;
+    const slotMin = SLOT_MINUTES[time];
+    const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+    const windowOpenMin = slotMin - 120;
+    const windowCloseMin = slotMin + 25;
+    const isWindowOpen = currentMinutes >= windowOpenMin && currentMinutes <= windowCloseMin;
+
+    const newBooking = {
+      userName: name,
+      bookedAt: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      confirmed: isWindowOpen, // If booking directly during the window, auto-confirm
+      confirmedAt: isWindowOpen ? currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
+    };
+
+    const nextSlots = {
+      ...slots,
+      [slotKey]: newBooking
+    };
+
+    setSlots(nextSlots);
+    localStorage.setItem('nipo_laundry_slots', JSON.stringify(nextSlots));
+    syncToCloud(nextSlots);
+  };
+
+  // Confirm attendance (Check-in)
+  const handleConfirmAttendance = (machineId, time) => {
+    const slotKey = `${machineId}_${time}`;
+    const existing = slots[slotKey];
+    if (!existing) return;
+
+    const updatedBooking = {
+      ...existing,
+      confirmed: true,
+      confirmedAt: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    const nextSlots = {
+      ...slots,
+      [slotKey]: updatedBooking
+    };
+
+    setSlots(nextSlots);
+    localStorage.setItem('nipo_laundry_slots', JSON.stringify(nextSlots));
+    syncToCloud(nextSlots);
+  };
+
+  // Cancel reservation
+  const handleCancelBooking = (machineId, time) => {
+    const slotKey = `${machineId}_${time}`;
+    const existing = slots[slotKey];
+    const name = existing ? existing.userName : 'este horário';
+
+    if (window.confirm(`Deseja realmente liberar a Máquina ${machineId} às ${time} (${name})?`)) {
+      const nextSlots = { ...slots };
+      delete nextSlots[slotKey];
+
+      setSlots(nextSlots);
+      localStorage.setItem('nipo_laundry_slots', JSON.stringify(nextSlots));
+      syncToCloud(nextSlots);
     }
   };
 
-  const handleAddOrUpdateOrder = (newOrder) => {
-    setOrders(prev => {
-      const index = prev.findIndex(o => o.name.toLowerCase() === newOrder.name.toLowerCase());
-      let updated;
-      if (index >= 0) {
-        updated = [...prev];
-        updated[index] = { ...updated[index], ...newOrder };
-      } else {
-        updated = [newOrder, ...prev];
-      }
-      syncToCloud(updated, undefined, undefined);
-      return updated;
-    });
+  // Reset entire board
+  const handleResetEntireBoard = () => {
+    const empty = {};
+    setSlots(empty);
+    localStorage.setItem('nipo_laundry_slots', JSON.stringify(empty));
+    syncToCloud(empty);
   };
-
-  const handleDeleteOrder = (nameToDelete) => {
-    setOrders(prev => {
-      const updated = prev.filter(o => o.name.toLowerCase() !== nameToDelete.toLowerCase());
-      syncToCloud(updated, undefined, undefined);
-      return updated;
-    });
-  };
-
-  const handleResetOrders = () => {
-    setOrders([]);
-    syncToCloud([], undefined, undefined);
-  };
-
-  const handleUpdateMenu = (newMenu) => {
-    setMenu(newMenu);
-    syncToCloud(undefined, newMenu, undefined);
-  };
-
-  const handleUpdateDeadline = (newDeadline) => {
-    setDeadlineTime(newDeadline);
-    syncToCloud(undefined, undefined, newDeadline);
-  };
-
-  const checkDeadlinePassed = () => {
-    if (!deadlineTime) return false;
-    const now = new Date();
-    const [hours, minutes] = deadlineTime.split(':').map(Number);
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const deadlineMinutes = hours * 60 + minutes;
-    return currentMinutes >= deadlineMinutes;
-  };
-
-  const isOrderDeadlinePassed = checkDeadlinePassed();
 
   return (
-    <div style={{ minHeight: '100vh', padding: '16px 12px 40px 12px' }}>
-      <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', padding: '16px 12px 48px 12px' }}>
+      <div style={{ maxWidth: '1020px', margin: '0 auto' }}>
         
         {/* Top Header */}
         <Header 
-          isManager={isManager} 
-          onLogoutManager={handleLogoutManager} 
-          theme={theme} 
+          currentUserName={currentUserName}
+          onEditUserName={() => setUserNameModalOpen(true)}
+          theme={theme}
           toggleTheme={toggleTheme}
-          onRequestManagerAccess={handleRequestManagerAccess}
+          currentTime={currentTime}
+          isSyncing={isSyncing}
+          onManualRefresh={fetchCloudState}
         />
 
-        {/* Manager Connected Alert Bar */}
-        {isManager && (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(74, 46, 99, 0.4) 0%, rgba(30, 101, 181, 0.4) 100%)',
-            border: '1px solid var(--color-yellow)',
-            padding: '12px 20px',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: '20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '10px'
-          }} className="animate-fade-in">
-            <span style={{ fontSize: '0.9rem', color: 'var(--color-yellow)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={18} color="var(--color-yellow)" /> Você está autenticado como Gerenciador.
-            </span>
-            <button 
-              onClick={() => setIsManagerModalOpen(true)}
-              className="btn btn-primary"
-              style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-            >
-              Configurações & Administrar Lista
-            </button>
-          </div>
-        )}
+        {/* Rules Explainer */}
+        <RulesBanner />
 
-        {/* Cardápio do Dia */}
-        <MenuCard 
-          menu={menu} 
-          setMenu={handleUpdateMenu} 
-          isManager={isManager}
-          isOrderDeadlinePassed={isOrderDeadlinePassed}
-        />
+        {/* 3 Machines Grid (1, 2, 4) */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+          gap: '18px',
+          marginBottom: '20px'
+        }}>
+          {MACHINES.map(mId => (
+            <MachineColumn
+              key={mId}
+              machineId={mId}
+              slots={slots}
+              currentTime={currentTime}
+              currentUserName={currentUserName}
+              onBook={handleOpenBookModal}
+              onConfirm={handleConfirmAttendance}
+              onCancel={handleCancelBooking}
+            />
+          ))}
+        </div>
 
-        {/* Totais da Cozinha */}
-        <KitchenSummary 
-          orders={orders} 
-          menu={menu}
-        />
-
-        {/* Form para o Morador colocar seu nome */}
-        <OrderForm 
-          onAddOrUpdateOrder={handleAddOrUpdateOrder}
-          existingNames={orders.map(o => o.name)}
-          isOrderDeadlinePassed={isOrderDeadlinePassed}
-          isManager={isManager}
-          deadlineTime={deadlineTime}
-        />
-
-        {/* Lista de Confirmados do Dia */}
-        <OrderList 
-          orders={orders}
-          onDeleteOrder={handleDeleteOrder}
-          onEditOrder={handleAddOrUpdateOrder}
-          isManager={isManager}
-          isOrderDeadlinePassed={isOrderDeadlinePassed}
-          deadlineTime={deadlineTime}
+        {/* Action Bar & Stats */}
+        <ActionBar 
+          slots={slots}
+          onResetBoard={handleResetEntireBoard}
+          currentDateStr={currentTime.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
         />
 
         {/* Footer */}
         <footer style={{
           textAlign: 'center',
-          marginTop: '32px',
+          marginTop: '36px',
           paddingTop: '20px',
           borderTop: '1px solid var(--border-color)',
           color: 'var(--text-muted)',
           fontSize: '0.85rem'
         }}>
           <p style={{ marginBottom: '4px' }}>
-            🍱 <strong>NipoFood</strong> • Cardápio & Marmitas da República
+            🧺 <strong>Nipo Lavanderia</strong> • Máquinas 1, 2 e 4
           </p>
           <p style={{ fontSize: '0.75rem' }}>
-            Pedidos somente até {deadlineTime}h.
+            Reset automático diário às 23:59 • Confirmação obrigatória até 25min após o horário.
           </p>
         </footer>
 
       </div>
 
-      {/* Login Modal for Manager */}
-      {pinPromptOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(26, 13, 40, 0.9)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1100,
-          padding: '20px'
-        }} className="animate-fade-in">
-          
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '28px', position: 'relative' }}>
-            
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '50%',
-                background: 'var(--color-yellow)',
-                color: '#1A0D28',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '12px',
-                boxShadow: '0 4px 15px rgba(245, 194, 59, 0.4)'
-              }}>
-                <KeyRound size={26} color="#1A0D28" />
-              </div>
-              <h3 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0 }}>
-                Login de Gerenciador
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Digite a senha de gerenciador para liberar edições e configurações.
-              </p>
-            </div>
+      {/* Booking Modal */}
+      <BookingModal 
+        isOpen={bookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+        targetSlot={targetSlot}
+        savedUserName={currentUserName}
+        onConfirmBooking={handleConfirmBooking}
+      />
 
-            {loginSuccessMsg ? (
-              <div style={{
-                background: 'rgba(30, 101, 181, 0.3)',
-                border: '1px solid var(--color-yellow)',
-                color: 'var(--color-yellow)',
-                padding: '12px',
-                borderRadius: 'var(--radius-md)',
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                fontWeight: 600
-              }}>
-                <CheckCircle size={18} color="var(--color-yellow)" /> {loginSuccessMsg}
-              </div>
-            ) : (
-              <form onSubmit={handleVerifyPin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px', display: 'block', fontWeight: 600 }}>
-                    Senha de Acesso (PIN)
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <input 
-                      type={showPassword ? "text" : "password"} 
-                      className="input-field" 
-                      placeholder="Digite a senha..." 
-                      value={inputPin}
-                      onChange={(e) => setInputPin(e.target.value)}
-                      autoFocus
-                      required
-                      style={{ paddingLeft: '40px', paddingRight: '40px' }}
-                    />
-                    <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-yellow)' }} />
-                    
-                    <button 
-                      type="button" 
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--text-muted)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                {pinError && (
-                  <div style={{ color: 'var(--color-yellow)', fontSize: '0.85rem', background: 'rgba(245, 194, 59, 0.15)', border: '1px solid var(--color-yellow)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
-                    {pinError}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                  <button type="button" onClick={() => setPinPromptOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                    <LogIn size={16} /> Entrar
-                  </button>
-                </div>
-
-              </form>
-            )}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* Manager Settings Modal */}
-      <ManagerModal 
-        isOpen={isManagerModalOpen}
-        onClose={() => setIsManagerModalOpen(false)}
-        onResetOrders={handleResetOrders}
-        managerPin={managerPin}
-        setManagerPin={setManagerPin}
-        deadlineTime={deadlineTime}
-        setDeadlineTime={setDeadlineTime}
-        orders={orders}
-        menu={menu}
+      {/* User Name Customization Modal */}
+      <UserNameModal 
+        isOpen={userNameModalOpen}
+        onClose={() => setUserNameModalOpen(false)}
+        currentName={currentUserName}
+        onSaveName={handleSaveUserName}
       />
 
     </div>
@@ -489,9 +382,9 @@ export default IndexPage;
 
 export const Head = () => (
   <>
-    <title>NipoFood - Cardápio & Marmitas da República</title>
-    <meta name="description" content="Aplicativo PWA de gestão diária de refeições e marmitas da república NipoFood." />
-    <meta name="theme-color" content="#4A2E63" />
+    <title>Nipo Lavanderia - Agendamento das Máquinas de Lavar</title>
+    <meta name="description" content="Sistema inteligente de agendamento e confirmação das máquinas de lavar da república Nipo." />
+    <meta name="theme-color" content="#0B132B" />
     <link rel="icon" href="/icon.jpg" />
   </>
 );

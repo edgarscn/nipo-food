@@ -1,29 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap');
 
 :root {
-  /* Strict 3-Color Palette from NipoFood Sunset Logo */
-  --color-purple-dark: #2A173B;
-  --color-purple: #4A2E63;
-  --color-purple-light: #6B4C85;
+  /* Laundry Clean Theme Colors */
+  --color-primary: #00B4D8;
+  --color-primary-dark: #0077B6;
+  --color-primary-light: #90E0EF;
+  --color-accent: #48CAE4;
+  
+  --color-success: #10B981;
+  --color-success-bg: rgba(16, 185, 129, 0.15);
+  
+  --color-warning: #F59E0B;
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
 
-  --color-yellow: #F5C23B;
-  --color-yellow-dark: #D4A120;
+  --color-danger: #EF4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
 
-  --color-blue: #1E65B5;
-  --color-blue-dark: #154D8C;
-
-  /* Theme Surfaces (Using the 3 Core Colors + Neutrals for Legibility) */
-  --bg-gradient: linear-gradient(135deg, var(--color-purple-dark) 0%, #1A0D28 100%);
-  --bg-card: rgba(74, 46, 99, 0.45);
-  --bg-card-hover: rgba(74, 46, 99, 0.65);
-  --border-color: rgba(245, 194, 59, 0.25);
-  --border-blue: rgba(30, 101, 181, 0.4);
+  /* Dark Theme Surfaces */
+  --bg-gradient: linear-gradient(145deg, #0B132B 0%, #1C2541 60%, #0F172A 100%);
+  --bg-card: rgba(28, 37, 65, 0.7);
+  --bg-card-hover: rgba(38, 50, 85, 0.85);
+  --bg-slot-free: rgba(255, 255, 255, 0.04);
+  --border-color: rgba(0, 180, 216, 0.25);
+  --border-card: rgba(255, 255, 255, 0.1);
 
   --text-primary: #FFFFFF;
-  --text-secondary: #E2E8F0;
-  --text-muted: #A0AEC0;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
 
-  --glass-shadow: 0 16px 36px -10px rgba(26, 13, 40, 0.6), 0 0 20px rgba(245, 194, 59, 0.1);
+  --glass-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 180, 216, 0.1);
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -33,16 +38,18 @@
 }
 
 [data-theme='light'] {
-  --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+  --bg-gradient: linear-gradient(145deg, #F0F9FF 0%, #E0F2FE 50%, #F8FAFC 100%);
   --bg-card: rgba(255, 255, 255, 0.95);
   --bg-card-hover: rgba(255, 255, 255, 1);
-  --border-color: rgba(30, 101, 181, 0.2);
+  --bg-slot-free: rgba(0, 180, 216, 0.04);
+  --border-color: rgba(0, 119, 182, 0.25);
+  --border-card: rgba(0, 0, 0, 0.08);
 
-  --text-primary: #1A0D28;
-  --text-secondary: #4A2E63;
-  --text-muted: #6C757D;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
 
-  --glass-shadow: 0 10px 30px -10px rgba(74, 46, 99, 0.12);
+  --glass-shadow: 0 12px 30px -10px rgba(0, 119, 182, 0.15);
 }
 
 * {
@@ -68,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-/* Glassmorphism Container Card */
+/* Glass Panels */
 .glass-panel {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
@@ -76,82 +83,98 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s ease;
 }
 
 .glass-panel:hover {
-  border-color: var(--color-yellow);
+  border-color: var(--color-primary);
 }
 
-/* Yellow Sun Highlight Text */
-.gradient-text {
-  color: var(--color-yellow);
-}
-
-/* Buttons (Yellow Primary, Blue Secondary, Purple Subtle) */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 10px 18px;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
+  user-select: none;
 }
 
-/* 1. Yellow Sun Primary Button */
-.btn-primary, .btn-sunset {
-  background: var(--color-yellow);
-  color: #1A0D28;
-  box-shadow: 0 4px 15px rgba(245, 194, 59, 0.35);
+.btn-primary {
+  background: var(--color-primary);
+  color: #0B132B;
+  box-shadow: 0 4px 14px rgba(0, 180, 216, 0.35);
 }
 
-.btn-primary:hover, .btn-sunset:hover {
-  background: var(--color-yellow-dark);
+.btn-primary:hover {
+  background: var(--color-accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(245, 194, 59, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
 }
 
-/* 2. Ocean Blue Secondary Button */
+.btn-primary:active {
+  transform: translateY(0);
+}
+
 .btn-secondary {
-  background: var(--color-blue);
-  color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background: var(--color-blue-dark);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--color-primary);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.btn-success:hover {
+  filter: brightness(1.1);
   transform: translateY(-1px);
 }
 
-/* 3. Purple Accent Button */
-.btn-purple {
-  background: var(--color-purple);
-  color: var(--color-yellow);
-  border: 1px solid var(--color-yellow);
-}
-
-.btn-purple:hover {
-  background: var(--color-purple-light);
+.btn-warning {
+  background: var(--color-warning);
+  color: #0F172A;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  animation: pulseWarning 2s infinite;
 }
 
 .btn-danger {
-  background: rgba(30, 101, 181, 0.3);
-  color: var(--color-yellow);
-  border: 1px solid var(--color-yellow);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* Inputs & Form Elements */
+.btn-danger:hover {
+  background: var(--color-danger);
+  color: #FFFFFF;
+}
+
+@keyframes pulseWarning {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+/* Inputs */
 .input-field {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(26, 13, 40, 0.6);
+  background: rgba(11, 19, 43, 0.7);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: #FFFFFF;
@@ -162,24 +185,64 @@ h1, h2, h3, h4, h5, h6 {
 
 [data-theme='light'] .input-field {
   background: #FFFFFF;
-  color: #1A0D28;
-  border-color: var(--color-blue);
+  color: #0F172A;
+  border-color: rgba(0, 119, 182, 0.3);
 }
 
 .input-field:focus {
   outline: none;
-  border-color: var(--color-yellow);
-  box-shadow: 0 0 0 3px rgba(245, 194, 59, 0.25);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.25);
+}
+
+/* Slot Card styling */
+.slot-card {
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.slot-card.free {
+  background: var(--bg-slot-free);
+  border: 1px dashed var(--border-color);
+}
+
+.slot-card.free:hover {
+  background: rgba(0, 180, 216, 0.08);
+  border-color: var(--color-primary);
+}
+
+.slot-card.booked {
+  background: rgba(28, 37, 65, 0.85);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme='light'] .slot-card.booked {
+  background: #FFFFFF;
+  border-color: rgba(0, 119, 182, 0.2);
+}
+
+.slot-card.confirmed {
+  border-color: var(--color-success);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(28, 37, 65, 0.9) 100%);
+}
+
+.slot-card.needs-confirmation {
+  border-color: var(--color-warning);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(28, 37, 65, 0.95) 100%);
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Scrollbar */
@@ -187,9 +250,9 @@ h1, h2, h3, h4, h5, h6 {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-purple-dark);
+  background: #0B132B;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-yellow);
+  background: var(--color-primary);
   border-radius: 4px;
 }

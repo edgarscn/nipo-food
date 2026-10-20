@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
-    title: `Nipo Food - Cardápio & Marmitas da República`,
-    description: `Gerenciamento simplificado de refeições presenciais e marmitas para os moradores da república.`,
+    title: `Nipo Lavanderia - Agendamento das Máquinas de Lavar`,
+    description: `Sistema inteligente de agendamento e confirmação das máquinas de lavar da república.`,
     author: `@edgar`,
     siteUrl: `https://nipo-food.netlify.app`,
   },
@@ -9,11 +9,11 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Nipo Food - Refeições & Marmitas`,
-        short_name: `Nipo Food`,
+        name: `Nipo Lavanderia - Máquinas de Lavar`,
+        short_name: `Nipo Lavanderia`,
         start_url: `/`,
-        background_color: `#0F172A`,
-        theme_color: `#6B4C85`,
+        background_color: `#0B132B`,
+        theme_color: `#00B4D8`,
         display: `standalone`,
         icon: `static/icon.jpg`,
         icons: [
