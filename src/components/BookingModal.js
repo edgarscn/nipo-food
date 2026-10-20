@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Plus, Waves, Clock } from 'lucide-react';
 
+const SLOT_DEADLINE_INFO = {
+  "08:00": "você tem de 6:30 até 8h25 para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.",
+  "14:00": "você tem de 12:30 até 14h25 para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.",
+  "21:00": "você tem de 19:30 até 21h25 para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa."
+};
+
 const BookingModal = ({ 
   isOpen, 
   onClose, 
@@ -31,6 +37,9 @@ const BookingModal = ({
     onClose();
   };
 
+  const deadlineMessage = SLOT_DEADLINE_INFO[targetSlot.time] || 
+    `você tem até 25min após às ${targetSlot.time} para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.`;
+
   return (
     <div style={{
       position: 'fixed',
@@ -48,7 +57,7 @@ const BookingModal = ({
     }} className="animate-fade-in">
       
       <div className="glass-panel" style={{
-        maxWidth: '420px',
+        maxWidth: '430px',
         width: '100%',
         padding: '24px',
         position: 'relative'
@@ -115,12 +124,13 @@ const BookingModal = ({
           <div style={{
             background: 'rgba(0, 180, 216, 0.08)',
             border: '1px solid var(--border-color)',
-            padding: '10px 14px',
+            padding: '12px 14px',
             borderRadius: 'var(--radius-sm)',
-            fontSize: '0.8rem',
-            color: 'var(--text-secondary)'
+            fontSize: '0.85rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.45
           }}>
-            ℹ️ <strong>Lembrete importante:</strong> Entre 2h antes e 25min depois do horário ({targetSlot.time}), você precisará entrar no app e clicar em <strong>"Confirmar Uso"</strong> para não perder a vaga.
+            ℹ️ <strong>Lembrete importante:</strong> {deadlineMessage}
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>

@@ -66,7 +66,10 @@ const RulesBanner = () => {
             <div>
               <strong style={{ color: 'var(--color-warning)' }}>Confirmação Obrigatória:</strong>
               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Abre <strong>2h antes</strong> e fecha <strong>25 min após</strong> o horário. Se não confirmar, a vaga é liberada automaticamente!
+                • 08:00: confirmar de <strong>6:30 até 8h25</strong><br />
+                • 14:00: confirmar de <strong>12:30 até 14h25</strong><br />
+                • 21:00: confirmar de <strong>19:30 até 21h25</strong><br />
+                Se não confirmar, a vaga é liberada automaticamente!
               </p>
             </div>
           </div>

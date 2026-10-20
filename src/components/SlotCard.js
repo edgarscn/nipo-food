@@ -2,9 +2,9 @@ import React from 'react';
 import { Clock, CheckCircle2, AlertTriangle, User, Plus, X, Sun, Sunset, Moon, Sparkles } from 'lucide-react';
 
 const SLOT_CONFIGS = {
-  "08:00": { minutes: 480, period: "Manhã", windowOpen: "06:00", windowClose: "08:25", icon: Sun, color: "#00B4D8" },
-  "14:00": { minutes: 840, period: "Tarde", windowOpen: "12:00", windowClose: "14:25", icon: Sunset, color: "#F59E0B" },
-  "21:00": { minutes: 1260, period: "Noite", windowOpen: "19:00", windowClose: "21:25", icon: Moon, color: "#8B5CF6" }
+  "08:00": { minutes: 480, period: "Manhã", windowOpen: "6:30", windowClose: "8h25", icon: Sun, color: "#00B4D8" },
+  "14:00": { minutes: 840, period: "Tarde", windowOpen: "12:30", windowClose: "14h25", icon: Sunset, color: "#F59E0B" },
+  "21:00": { minutes: 1260, period: "Noite", windowOpen: "19:30", windowClose: "21h25", icon: Moon, color: "#8B5CF6" }
 };
 
 const SlotCard = ({ 
@@ -20,7 +20,7 @@ const SlotCard = ({
   const config = SLOT_CONFIGS[time] || { minutes: 0, period: "", windowOpen: "", windowClose: "" };
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
-  const windowOpenMin = config.minutes - 120; // 2h antes
+  const windowOpenMin = config.minutes - 120; // abre 2h antes (ou 90 min)
   const windowCloseMin = config.minutes + 25;  // 25min depois
 
   const isWindowOpen = currentMinutes >= windowOpenMin && currentMinutes <= windowCloseMin;
@@ -79,7 +79,7 @@ const SlotCard = ({
           {isPastSlot ? (
             <span>Turno já transcorrido hoje</span>
           ) : (
-            <span>Confirmação: {config.windowOpen} às {config.windowClose}</span>
+            <span>Confirmação: {config.windowOpen} até {config.windowClose}</span>
           )}
         </div>
 
@@ -205,7 +205,7 @@ const SlotCard = ({
               ) : isWindowOpen ? (
                 `Confirmação fecha às ${config.windowClose}!`
               ) : (
-                `Confirmação abre às ${config.windowOpen}`
+                `Confirmar de ${config.windowOpen} até ${config.windowClose}`
               )}
             </span>
           </div>
@@ -250,7 +250,7 @@ const SlotCard = ({
             fontSize: '0.75rem',
             color: 'var(--text-muted)'
           }}>
-            Abre às {config.windowOpen}
+            Confirmar de {config.windowOpen} até {config.windowClose}
           </div>
         )}
 
