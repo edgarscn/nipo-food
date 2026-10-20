@@ -235,6 +235,27 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(28, 37, 65, 0.95) 100%);
 }
 
+.slot-card.locked-card {
+  background: rgba(30, 41, 59, 0.55) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+  box-shadow: none !important;
+  filter: grayscale(0.9);
+}
+
+[data-theme='light'] .slot-card.locked-card {
+  background: #E2E8F0 !important;
+  border: 1px solid #CBD5E1 !important;
+}
+
+.slot-card.locked-card:hover {
+  background: rgba(30, 41, 59, 0.55) !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }

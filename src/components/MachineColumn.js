@@ -17,11 +17,26 @@ const MachineColumn = ({
   onConfirm, 
   onCancel 
 }) => {
-  // Count how many confirmed/booked slots this machine has on this selected day
-  const bookedCount = TIMES.filter(time => {
+  const isToday = dateKey === todayDateKey;
+  const isPastDay = dateKey < todayDateKey;
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+  // Count how many slots are open and can actually be reserved right now
+  const availableSlotsCount = TIMES.filter(time => {
     const keyWithDate = `${dateKey}_${machineId}_${time}`;
     const legacyKey = `${machineId}_${time}`;
-    return slots[keyWithDate] || (dateKey === todayDateKey && slots[legacyKey]);
+    const booking = slots[keyWithDate] || (isToday ? slots[legacyKey] : null);
+    
+    // If booked, not free
+    if (booking) return false;
+    // If in the past, not available
+    if (isPastDay) return false;
+    // If today and passed lock limit, not available
+    if (isToday) {
+      const lockMin = time === "08:00" ? 540 : (time === "14:00" ? 900 : 1320);
+      if (currentMinutes > lockMin) return false;
+    }
+    return true;
   }).length;
 
   return (
@@ -45,21 +60,31 @@ const MachineColumn = ({
             width: '40px',
             height: '40px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, rgba(0, 180, 216, 0.2) 0%, rgba(0, 119, 182, 0.3) 100%)',
+            background: availableSlotsCount > 0 
+              ? 'linear-gradient(135deg, rgba(0, 180, 216, 0.2) 0%, rgba(0, 119, 182, 0.3) 100%)'
+              : 'rgba(100, 116, 139, 0.15)',
             border: '1px solid var(--border-color)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--color-primary)'
+            color: availableSlotsCount > 0 ? 'var(--color-primary)' : '#94A3B8'
           }}>
             <Waves size={22} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', margin: 0 }}>
+            <h2 style={{ fontSize: '1.25rem', color: availableSlotsCount > 0 ? 'var(--text-primary)' : 'var(--text-secondary)', margin: 0 }}>
               Máquina {machineId}
             </h2>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              {bookedCount === 0 ? "3 horários livres" : `${3 - bookedCount} livres de 3`}
+              {isPastDay ? (
+                "Dia encerrado"
+              ) : availableSlotsCount === 0 ? (
+                "Sem horários livres"
+              ) : availableSlotsCount === 1 ? (
+                "1 horário disponível"
+              ) : (
+                `${availableSlotsCount} horários disponíveis`
+              )}
             </span>
           </div>
         </div>
@@ -69,11 +94,11 @@ const MachineColumn = ({
           fontWeight: 700,
           padding: '4px 10px',
           borderRadius: '12px',
-          background: bookedCount === 3 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(0, 180, 216, 0.15)',
-          color: bookedCount === 3 ? 'var(--color-danger)' : 'var(--color-primary)',
-          border: `1px solid ${bookedCount === 3 ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-color)'}`
+          background: availableSlotsCount === 0 ? 'rgba(100, 116, 139, 0.15)' : 'rgba(0, 180, 216, 0.15)',
+          color: availableSlotsCount === 0 ? '#94A3B8' : 'var(--color-primary)',
+          border: `1px solid ${availableSlotsCount === 0 ? 'rgba(100, 116, 139, 0.3)' : 'var(--border-color)'}`
         }}>
-          {bookedCount === 3 ? "Ocupada" : "Disponível"}
+          {availableSlotsCount === 0 ? "Indisponível" : "Disponível"}
         </span>
       </div>
 
@@ -82,7 +107,7 @@ const MachineColumn = ({
         {TIMES.map(time => {
           const keyWithDate = `${dateKey}_${machineId}_${time}`;
           const legacyKey = `${machineId}_${time}`;
-          const booking = slots[keyWithDate] || (dateKey === todayDateKey ? slots[legacyKey] : null);
+          const booking = slots[keyWithDate] || (isToday ? slots[legacyKey] : null);
 
           return (
             <SlotCard

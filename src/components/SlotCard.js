@@ -74,84 +74,147 @@ const SlotCard = ({
   // Confirmation window only applies on the actual day
   const isWindowOpen = isToday && (currentMinutes >= config.openMin && currentMinutes <= config.closeMin);
   
-  // Last-minute window: between closeMin (e.g. 8h25) and lockMin (e.g. 9h00)
+  // Last-minute emergency window: between closeMin (e.g. 8h25) and lockMin (e.g. 9h00)
   const isLastChanceWindow = isToday && (currentMinutes > config.closeMin && currentMinutes <= config.lockMin);
   
   // Locked: after lockMin on today (e.g. after 9h00, 15h00, 22h00)
   const isLocked = isToday && (currentMinutes > config.lockMin);
 
+  // If a booking was unconfirmed and passed closeMin on today, treat it as released
+  const isUnconfirmedExpired = booking && !booking.confirmed && isToday && (currentMinutes > config.closeMin);
+  const effectiveBooking = isUnconfirmedExpired ? null : booking;
+
   const PeriodIcon = config.icon || Clock;
 
   // ==========================================
-  // Render when slot is FREE (UNBOOKED)
+  // 1. FREE (UNBOOKED) OR RELEASED SLOTS
   // ==========================================
-  if (!booking) {
-    return (
-      <div className={`slot-card free ${isLastChanceWindow ? 'needs-confirmation' : ''} animate-fade-in`} style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        minHeight: '155px',
-        gap: '12px',
-        opacity: (isPastDay || isLocked) ? 0.6 : 1,
-        border: isLastChanceWindow ? '1px solid rgba(245, 158, 11, 0.6)' : undefined,
-        background: isLastChanceWindow ? 'rgba(245, 158, 11, 0.05)' : undefined
-      }}>
-        
-        {/* Top Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              background: isLastChanceWindow ? 'rgba(245, 158, 11, 0.2)' : 'rgba(0, 180, 216, 0.12)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: isLastChanceWindow ? '#F59E0B' : 'var(--color-primary)'
-            }}>
-              {isLastChanceWindow ? <Zap size={18} /> : <PeriodIcon size={18} />}
-            </div>
-            <div>
-              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
-                {time}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                {config.period}
-              </span>
-            </div>
-          </div>
+  if (!effectiveBooking) {
 
-          {/* Status Badge */}
-          {isPastDay ? (
+    // 1A. LOCKED OR PAST SLOTS -> Entire card turns completely GRAY and disabled
+    if (isLocked || isPastDay) {
+      return (
+        <div className="slot-card locked-card animate-fade-in" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '155px',
+          gap: '12px',
+          background: 'rgba(30, 41, 59, 0.55)',
+          border: '1px solid rgba(148, 163, 184, 0.25)',
+          opacity: 0.65,
+          cursor: 'not-allowed'
+        }}>
+          {/* Top Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(148, 163, 184, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#94A3B8'
+              }}>
+                <Lock size={17} />
+              </div>
+              <div>
+                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#94A3B8', lineHeight: 1 }}>
+                  {time}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#64748B', marginLeft: '6px' }}>
+                  {config.period}
+                </span>
+              </div>
+            </div>
+
             <span style={{
               fontSize: '0.75rem',
               padding: '3px 8px',
               borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'var(--text-muted)',
-              fontWeight: 700,
-              border: '1px solid var(--border-color)'
-            }}>
-              Encerrado
-            </span>
-          ) : isLocked ? (
-            <span style={{
-              fontSize: '0.75rem',
-              padding: '3px 8px',
-              borderRadius: '12px',
-              background: 'rgba(239, 68, 68, 0.12)',
-              color: 'var(--color-danger)',
+              background: 'rgba(100, 116, 139, 0.2)',
+              color: '#94A3B8',
               fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
-              border: '1px solid rgba(239, 68, 68, 0.3)'
+              border: '1px solid rgba(148, 163, 184, 0.3)'
             }}>
-              <Lock size={12} /> Trancado
+              <Lock size={12} /> {isPastDay ? 'Dia Encerrado' : 'Trancado'}
             </span>
-          ) : isLastChanceWindow ? (
+          </div>
+
+          {/* Message */}
+          <div style={{ fontSize: '0.8rem', color: '#94A3B8', lineHeight: 1.4 }}>
+            {isPastDay ? (
+              <span>Turno já encerrado neste dia anterior.</span>
+            ) : (
+              <span>
+                🔒 <strong>Trancado às {config.lockTime}:</strong> O horário limite para reserva encerrou. Máquina indisponível para este turno.
+              </span>
+            )}
+          </div>
+
+          {/* Disabled Button */}
+          <button 
+            disabled
+            className="btn btn-secondary"
+            style={{ 
+              width: '100%', 
+              padding: '9px 14px', 
+              fontSize: '0.85rem', 
+              background: 'rgba(148, 163, 184, 0.12)', 
+              color: '#94A3B8', 
+              border: '1px solid rgba(148, 163, 184, 0.25)', 
+              cursor: 'not-allowed',
+              fontWeight: 600
+            }}
+          >
+            <Lock size={15} /> Impossibilitado de Reservar
+          </button>
+        </div>
+      );
+    }
+
+    // 1B. LAST-MINUTE EMERGENCY WINDOW (e.g. 8h25 to 9h00)
+    if (isLastChanceWindow) {
+      return (
+        <div className="slot-card free needs-confirmation animate-fade-in" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '155px',
+          gap: '12px',
+          border: '1px solid rgba(245, 158, 11, 0.6)',
+          background: 'rgba(245, 158, 11, 0.05)'
+        }}>
+          {/* Top Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(245, 158, 11, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#F59E0B'
+              }}>
+                <Zap size={18} />
+              </div>
+              <div>
+                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+                  {time}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                  {config.period}
+                </span>
+              </div>
+            </div>
+
             <span style={{
               fontSize: '0.75rem',
               padding: '3px 8px',
@@ -166,58 +229,14 @@ const SlotCard = ({
             }}>
               <Zap size={12} /> Vaga Liberada!
             </span>
-          ) : (
-            <span style={{
-              fontSize: '0.75rem',
-              padding: '3px 8px',
-              borderRadius: '12px',
-              background: 'rgba(16, 185, 129, 0.12)',
-              color: 'var(--color-success)',
-              fontWeight: 700,
-              border: '1px solid rgba(16, 185, 129, 0.3)'
-            }}>
-              Livre ✨
-            </span>
-          )}
-        </div>
+          </div>
 
-        {/* Message / Notice */}
-        <div style={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
-          {isPastDay ? (
-            <span style={{ color: 'var(--text-muted)' }}>Dia já transcorrido</span>
-          ) : isLocked ? (
-            <span style={{ color: 'var(--color-danger)' }}>
-              🔒 <strong>Trancado às {config.lockTime}:</strong> Este horário não está mais disponível para reservas.
-            </span>
-          ) : isLastChanceWindow ? (
-            <span style={{ color: '#F59E0B' }}>
-              ⚡ <strong>Vaga liberada!</strong> Você tem até às <strong>{config.lockTime}</strong> para reservar e usar. Às {config.lockTime} o horário será trancado!
-            </span>
-          ) : isFutureDay ? (
-            <span style={{ color: 'var(--text-secondary)' }}>Disponível para agendamento em {dayName}</span>
-          ) : (
-            <span style={{ color: 'var(--text-muted)' }}>Confirmação: {config.windowOpen} até {config.windowClose}</span>
-          )}
-        </div>
+          {/* Alert Message */}
+          <div style={{ fontSize: '0.8rem', lineHeight: 1.4, color: '#F59E0B' }}>
+            ⚡ <strong>Vaga liberada!</strong> Você tem até às <strong>{config.lockTime}</strong> para reservar e usar. Às {config.lockTime} o horário será trancado!
+          </div>
 
-        {/* Action Button */}
-        {isPastDay ? (
-          <button 
-            disabled
-            className="btn btn-secondary"
-            style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem', opacity: 0.5, cursor: 'not-allowed' }}
-          >
-            Encerrado
-          </button>
-        ) : isLocked ? (
-          <button 
-            disabled
-            className="btn btn-secondary"
-            style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem', opacity: 0.5, cursor: 'not-allowed' }}
-          >
-            <Lock size={15} /> Horário Trancado
-          </button>
-        ) : isLastChanceWindow ? (
+          {/* Action Button */}
           <button 
             onClick={() => onBook(machineId, time, dateKey, dayName, true, config.lockTime)}
             className="btn btn-warning"
@@ -225,24 +244,83 @@ const SlotCard = ({
           >
             <Zap size={16} /> Reservar e Usar Agora (até {config.lockTime})
           </button>
-        ) : (
-          <button 
-            onClick={() => onBook(machineId, time, dateKey, dayName, false, config.lockTime)}
-            className="btn btn-primary"
-            style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem' }}
-          >
-            <Plus size={16} /> Reservar Horário
-          </button>
-        )}
+        </div>
+      );
+    }
+
+    // 1C. STANDARD FREE SLOT (Future days or today before closeMin)
+    return (
+      <div className="slot-card free animate-fade-in" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: '155px',
+        gap: '12px'
+      }}>
+        {/* Top Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: 'rgba(0, 180, 216, 0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--color-primary)'
+            }}>
+              <PeriodIcon size={18} />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+                {time}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                {config.period}
+              </span>
+            </div>
+          </div>
+
+          <span style={{
+            fontSize: '0.75rem',
+            padding: '3px 8px',
+            borderRadius: '12px',
+            background: 'rgba(16, 185, 129, 0.12)',
+            color: 'var(--color-success)',
+            fontWeight: 700,
+            border: '1px solid rgba(16, 185, 129, 0.3)'
+          }}>
+            Livre ✨
+          </span>
+        </div>
+
+        {/* Message */}
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          {isFutureDay ? (
+            <span>Disponível para agendamento em {dayName}</span>
+          ) : (
+            <span>Confirmação: {config.windowOpen} até {config.windowClose}</span>
+          )}
+        </div>
+
+        {/* Action Button */}
+        <button 
+          onClick={() => onBook(machineId, time, dateKey, dayName, false, config.lockTime)}
+          className="btn btn-primary"
+          style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem' }}
+        >
+          <Plus size={16} /> Reservar Horário
+        </button>
       </div>
     );
   }
 
   // ==========================================
-  // Render when slot is BOOKED
+  // 2. BOOKED SLOTS (CONFIRMED OR PENDING CONFIRMATION)
   // ==========================================
-  const isConfirmed = booking.confirmed;
-  const isCurrentUser = currentUserName && booking.userName && booking.userName.toLowerCase() === currentUserName.toLowerCase();
+  const isConfirmed = effectiveBooking.confirmed;
+  const isCurrentUser = currentUserName && effectiveBooking.userName && effectiveBooking.userName.toLowerCase() === currentUserName.toLowerCase();
 
   return (
     <div className={`slot-card booked ${isConfirmed ? 'confirmed' : (isWindowOpen ? 'needs-confirmation' : '')} animate-fade-in`} style={{
@@ -363,17 +441,17 @@ const SlotCard = ({
             fontSize: '0.75rem',
             fontWeight: 800
           }}>
-            {booking.userName ? booking.userName.charAt(0).toUpperCase() : "?"}
+            {effectiveBooking.userName ? effectiveBooking.userName.charAt(0).toUpperCase() : "?"}
           </div>
           <div>
             <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
-              {booking.userName} {isCurrentUser && <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}>(Você)</span>}
+              {effectiveBooking.userName} {isCurrentUser && <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}>(Você)</span>}
             </h4>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
               {isPastDay ? (
                 `Reservado para ${dayName}`
               ) : isConfirmed ? (
-                `Confirmado às ${booking.confirmedAt || 'hoje'}`
+                `Confirmado às ${effectiveBooking.confirmedAt || 'hoje'}`
               ) : isWindowOpen ? (
                 `Confirmação fecha às ${config.windowClose}!`
               ) : isFutureDay ? (
