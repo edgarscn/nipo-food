@@ -49,6 +49,7 @@ const SlotCard = ({
   booking, 
   currentTime, 
   currentUserName, 
+  currentDeviceId,
   isAdmin,
   onBook, 
   onConfirm, 
@@ -320,7 +321,14 @@ const SlotCard = ({
   // 2. BOOKED SLOTS (CONFIRMED OR PENDING CONFIRMATION)
   // ==========================================
   const isConfirmed = effectiveBooking.confirmed;
-  const isCurrentUser = currentUserName && effectiveBooking.userName && effectiveBooking.userName.toLowerCase() === currentUserName.toLowerCase();
+  
+  // Ownership verification: deviceId match OR userName match OR admin
+  const isOwner = Boolean(
+    isAdmin || 
+    (effectiveBooking.deviceId && currentDeviceId && effectiveBooking.deviceId === currentDeviceId) ||
+    (currentUserName && effectiveBooking.userName && currentUserName.trim().toLowerCase() === effectiveBooking.userName.trim().toLowerCase())
+  );
+  const isCurrentUser = isOwner;
 
   // Colors:
   // - RESERVADO (Pending Confirmation) -> AMARELO (#F59E0B)
@@ -459,70 +467,127 @@ const SlotCard = ({
       </div>
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         
-        {/* If pending confirmation (YELLOW state): BIG Confirm Button to turn it RED! */}
-        {!isConfirmed && !isPastDay && (
-          <button 
-            onClick={() => onConfirm(machineId, time, dateKey)}
-            className="btn btn-warning"
-            style={{ 
-              flex: 1, 
-              padding: '8px 12px', 
-              fontSize: '0.85rem', 
-              fontWeight: 800,
-              background: '#F59E0B',
-              color: '#0B132B',
-              border: 'none',
-              boxShadow: '0 2px 10px rgba(245, 158, 11, 0.4)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px'
-            }}
-          >
-            <CheckCircle2 size={16} /> Confirmar Uso
-          </button>
-        )}
+        {/* If the current viewer is the OWNER (or Admin): */}
+        {isOwner ? (
+          <>
+            {/* If pending confirmation (YELLOW state): */}
+            {!isConfirmed && !isPastDay && (
+              isWindowOpen ? (
+                /* Inside the established window -> ACTIVE Confirm button! */
+                <button 
+                  onClick={() => onConfirm(machineId, time, dateKey)}
+                  className="btn btn-warning"
+                  style={{ 
+                    flex: 1, 
+                    padding: '8px 12px', 
+                    fontSize: '0.85rem', 
+                    fontWeight: 800,
+                    background: '#F59E0B',
+                    color: '#0B132B',
+                    border: 'none',
+                    boxShadow: '0 2px 10px rgba(245, 158, 11, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                  title={`Confirmação aberta até ${config.windowClose}`}
+                >
+                  <CheckCircle2 size={16} /> Confirmar Presença (até {config.windowClose})
+                </button>
+              ) : (
+                /* Outside the window -> Disabled notice explaining when it opens */
+                <div 
+                  style={{
+                    flex: 1,
+                    padding: '7px 10px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    fontSize: '0.75rem',
+                    color: '#FDE68A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 600
+                  }}
+                >
+                  <Clock size={14} color="#F59E0B" />
+                  <span>
+                    {isToday 
+                      ? `Confirmação abre às ${config.windowOpen}` 
+                      : `Confirmação no dia (${config.windowOpen} até ${config.windowClose})`}
+                  </span>
+                </div>
+              )
+            )}
 
-        {/* Already Confirmed Banner in Red */}
-        {isConfirmed && !isPastDay && (
+            {/* Already Confirmed Banner in Red */}
+            {isConfirmed && !isPastDay && (
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.82rem',
+                color: '#EF4444',
+                fontWeight: 800
+              }}>
+                <Sparkles size={15} /> Presença Confirmada (Em Uso)
+              </div>
+            )}
+
+            {/* Past day notice */}
+            {isPastDay && (
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)'
+              }}>
+                Agendamento encerrado
+              </div>
+            )}
+
+            {/* Cancel / Release Button: ONLY the owner or admin can see & click this */}
+            <button 
+              onClick={() => onCancel(machineId, time, dateKey, dayName)}
+              className="btn btn-danger"
+              style={{ padding: '8px 10px', fontSize: '0.8rem' }}
+              title={isAdmin ? "Liberar este horário (Ação de Administrador)" : "Liberar minha reserva"}
+            >
+              {isAdmin ? <ShieldCheck size={14} /> : <X size={15} />}
+              <span style={{ marginLeft: '4px' }}>Liberar</span>
+            </button>
+          </>
+        ) : (
+          /* NOT THE OWNER: Display informational state only (cannot confirm or cancel) */
           <div style={{
             flex: 1,
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            fontSize: '0.82rem',
-            color: '#EF4444',
-            fontWeight: 800
+            gap: '8px',
+            fontSize: '0.8rem',
+            color: isConfirmed ? '#EF4444' : '#F59E0B',
+            fontWeight: 600,
+            padding: '6px 0'
           }}>
-            <Sparkles size={15} /> Presença Confirmada (Em Uso)
+            {isConfirmed ? (
+              <>
+                <CheckCircle2 size={16} color="#EF4444" />
+                <span>Uso confirmado por {effectiveBooking.userName}</span>
+              </>
+            ) : (
+              <>
+                <Clock size={16} color="#F59E0B" />
+                <span>Reservado por {effectiveBooking.userName} (aguardando confirmação)</span>
+              </>
+            )}
           </div>
         )}
-
-        {/* Past day notice */}
-        {isPastDay && (
-          <div style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)'
-          }}>
-            Agendamento encerrado
-          </div>
-        )}
-
-        {/* Cancel / Release Button */}
-        <button 
-          onClick={() => onCancel(machineId, time, dateKey, dayName)}
-          className="btn btn-danger"
-          style={{ padding: '8px 10px', fontSize: '0.8rem' }}
-          title={isAdmin ? "Liberar este horário (Ação de Administrador)" : "Liberar este horário"}
-        >
-          {isAdmin ? <ShieldCheck size={14} /> : <X size={15} />}
-          <span style={{ marginLeft: '4px' }}>Liberar</span>
-        </button>
 
       </div>
 

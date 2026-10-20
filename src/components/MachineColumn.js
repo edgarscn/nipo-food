@@ -12,6 +12,7 @@ const MachineColumn = ({
   dayName,
   currentTime, 
   currentUserName, 
+  currentDeviceId,
   isAdmin,
   onBook, 
   onConfirm, 
@@ -120,6 +121,7 @@ const MachineColumn = ({
               booking={booking}
               currentTime={currentTime}
               currentUserName={currentUserName}
+              currentDeviceId={currentDeviceId}
               isAdmin={isAdmin}
               onBook={onBook}
               onConfirm={onConfirm}

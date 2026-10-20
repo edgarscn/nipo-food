@@ -94,6 +94,7 @@ const IndexPage = () => {
   const [userNameModalOpen, setUserNameModalOpen] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentDeviceId, setCurrentDeviceId] = useState('');
 
   const lastSyncTimestamp = useRef(0);
 
@@ -111,6 +112,13 @@ const IndexPage = () => {
   // 2. Load LocalStorage on Mount
   useEffect(() => {
     try {
+      let id = localStorage.getItem('nipo_laundry_device_id');
+      if (!id) {
+        id = 'dev_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+        localStorage.setItem('nipo_laundry_device_id', id);
+      }
+      setCurrentDeviceId(id);
+
       const savedTheme = localStorage.getItem('nipo_laundry_theme') || 'dark';
       setTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -348,6 +356,7 @@ const IndexPage = () => {
     // Only turns red after the user clicks "Confirmar Uso / Confirmar Presença"
     const newBooking = {
       userName: name,
+      deviceId: currentDeviceId || (typeof window !== 'undefined' ? localStorage.getItem('nipo_laundry_device_id') : '') || ('dev_' + Date.now()),
       bookedAt: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       confirmed: false,
       confirmedAt: null
@@ -371,6 +380,34 @@ const IndexPage = () => {
     const existing = slots[targetKey];
     if (!existing) return;
 
+    // Check Ownership: only the person who reserved (or Admin) can confirm
+    const isOwner = Boolean(
+      isAdmin || 
+      (existing.deviceId && currentDeviceId && existing.deviceId === currentDeviceId) ||
+      (currentUserName && existing.userName && currentUserName.trim().toLowerCase() === existing.userName.trim().toLowerCase())
+    );
+
+    if (!isOwner) {
+      alert(`Apenas ${existing.userName} (quem reservou) pode confirmar este horário.`);
+      return;
+    }
+
+    // Check Window: only allowed within the established schedule
+    const isToday = dateKey === todayDateKey;
+    const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+    const config = SLOT_CONFIGS[time];
+
+    if (!isAdmin) {
+      if (!isToday) {
+        alert("A confirmação só pode ser realizada no dia do uso da máquina.");
+        return;
+      }
+      if (config && (currentMinutes < config.openMin || currentMinutes > config.closeMin)) {
+        alert(`A confirmação só pode ser feita dentro do horário estabelecido (${config.windowOpen || 'horário'} até ${config.windowClose || 'tolerância'}).`);
+        return;
+      }
+    }
+
     const updatedBooking = {
       ...existing,
       confirmed: true,
@@ -393,7 +430,21 @@ const IndexPage = () => {
     const legacyKey = `${machineId}_${time}`;
     const targetKey = slots[keyWithDate] ? keyWithDate : (slots[legacyKey] ? legacyKey : keyWithDate);
     const existing = slots[targetKey];
-    const name = existing ? existing.userName : 'este horário';
+    if (!existing) return;
+
+    // Check Ownership: only the person who reserved (or Admin) can cancel
+    const isOwner = Boolean(
+      isAdmin || 
+      (existing.deviceId && currentDeviceId && existing.deviceId === currentDeviceId) ||
+      (currentUserName && existing.userName && currentUserName.trim().toLowerCase() === existing.userName.trim().toLowerCase())
+    );
+
+    if (!isOwner) {
+      alert(`Apenas ${existing.userName} (quem reservou) ou o Administrador pode liberar este horário.`);
+      return;
+    }
+
+    const name = existing.userName || 'este horário';
 
     if (window.confirm(`Deseja realmente liberar a Máquina ${machineId} às ${time} (${name})?`)) {
       const nextSlots = { ...slots };
@@ -480,6 +531,7 @@ const IndexPage = () => {
               dayName={selectedDay.dayName}
               currentTime={currentTime}
               currentUserName={currentUserName}
+              currentDeviceId={currentDeviceId}
               isAdmin={isAdmin}
               onBook={handleOpenBookModal}
               onConfirm={handleConfirmAttendance}
