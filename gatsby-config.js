@@ -3,7 +3,7 @@ module.exports = {
     title: `Nipo Lavanderia - Agendamento das Máquinas de Lavar`,
     description: `Sistema inteligente de agendamento e confirmação das máquinas de lavar da república.`,
     author: `@edgar`,
-    siteUrl: `https://nipo-food.netlify.app`,
+    siteUrl: `https://aesthetic-daffodil-24b59a.netlify.app`,
   },
   plugins: [
     {
@@ -16,16 +16,7 @@ module.exports = {
         theme_color: `#00B4D8`,
         display: `standalone`,
         icon: `static/icon.jpg`,
-        icons: [
-          {
-            src: `static/icon.jpg`,
-            sizes: `192x192 512x512`,
-            type: `image/jpeg`,
-            purpose: `any maskable`
-          }
-        ]
       },
     },
-    `gatsby-plugin-offline`,
   ],
 }
