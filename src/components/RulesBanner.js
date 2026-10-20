@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Info, ChevronDown, ChevronUp, Clock, AlertTriangle, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { Info, ChevronDown, ChevronUp, Clock, AlertTriangle, RotateCcw, Calendar, ShieldCheck } from 'lucide-react';
 
 const RulesBanner = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +27,7 @@ const RulesBanner = () => {
               Regras de Uso da Lavanderia
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Máquinas 1, 2 e 4 • Confirmação de uso • Reset às 23:59
+              Máquinas 1, 2 e 4 • Toda a semana • Reset domingo 23:59 • Admin (1531)
             </p>
           </div>
         </div>
@@ -47,16 +47,26 @@ const RulesBanner = () => {
           borderTop: '1px solid var(--border-color)',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '12px',
+          gap: '14px',
           fontSize: '0.85rem'
         }}>
           
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <Calendar size={16} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ color: 'var(--text-primary)' }}>Agendamento Semanal Aberto:</strong>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                Você pode agendar horários em qualquer dia da semana (Segunda a Domingo) em quantas máquinas e turnos desejar.
+              </p>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <Clock size={16} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
               <strong style={{ color: 'var(--text-primary)' }}>3 Horários Diários:</strong>
               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Manhã (<strong>08:00</strong>), Tarde (<strong>14:00</strong>) e Noite (<strong>21:00</strong>).
+                Manhã (<strong>08:00</strong>), Tarde (<strong>14:00</strong>) e Noite (<strong>21:00</strong>) para as máquinas 1, 2 e 4.
               </p>
             </div>
           </div>
@@ -69,7 +79,7 @@ const RulesBanner = () => {
                 • 08:00: confirmar de <strong>6:30 até 8h25</strong><br />
                 • 14:00: confirmar de <strong>12:30 até 14h25</strong><br />
                 • 21:00: confirmar de <strong>19:30 até 21h25</strong><br />
-                Se não confirmar, a vaga é liberada automaticamente!
+                Se não confirmar no app, o horário é liberado para outra pessoa!
               </p>
             </div>
           </div>
@@ -77,19 +87,9 @@ const RulesBanner = () => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <RotateCcw size={16} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              <strong style={{ color: 'var(--text-primary)' }}>Zerar às 23:59:</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>Reset Todo Domingo às 23:59:</strong>
               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Todas as noites às <strong>23:59</strong> o quadro é limpo para o dia seguinte.
-              </p>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-            <CheckCircle2 size={16} color="var(--color-success)" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong style={{ color: 'var(--color-success)' }}>Sem Limite de Vagas:</strong>
-              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Você pode agendar quantos horários e máquinas precisar no dia.
+                O quadro semanal é <strong>zerado automaticamente todo domingo às 23:59</strong> para a semana seguinte.
               </p>
             </div>
           </div>

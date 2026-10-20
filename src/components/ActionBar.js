@@ -1,34 +1,49 @@
 import React, { useState } from 'react';
-import { Share2, Check, RotateCcw, Sparkles } from 'lucide-react';
+import { Share2, Check, RotateCcw, ShieldCheck, Calendar } from 'lucide-react';
 
 const MACHINES = [1, 2, 4];
 const TIMES = ["08:00", "14:00", "21:00"];
 
-const ActionBar = ({ slots = {}, onResetBoard, currentDateStr }) => {
+const ActionBar = ({ 
+  slots = {}, 
+  selectedDateKey, 
+  selectedDayName,
+  todayDateKey,
+  onOpenAdmin,
+  isAdmin,
+  onResetBoard 
+}) => {
   const [copied, setCopied] = useState(false);
 
-  // Compute stats
-  let totalBooked = 0;
-  let totalConfirmed = 0;
+  // Compute stats for selected day
+  let dayBooked = 0;
+  let dayConfirmed = 0;
 
   MACHINES.forEach(m => {
     TIMES.forEach(t => {
-      const booking = slots[`${m}_${t}`];
+      const keyWithDate = `${selectedDateKey}_${m}_${t}`;
+      const legacyKey = `${m}_${t}`;
+      const booking = slots[keyWithDate] || (selectedDateKey === todayDateKey ? slots[legacyKey] : null);
       if (booking) {
-        totalBooked++;
-        if (booking.confirmed) totalConfirmed++;
+        dayBooked++;
+        if (booking.confirmed) dayConfirmed++;
       }
     });
   });
 
+  // Compute total week bookings
+  const totalWeekBookings = Object.keys(slots).filter(k => slots[k] && slots[k].userName).length;
+
   const handleShareWhatsApp = () => {
-    let msg = `🧺 *NIPO LAVANDERIA - QUADRO DE HOJE* 🧺\n`;
-    msg += `🗓️ *${currentDateStr || 'Hoje'}*\n\n`;
+    let msg = `🧺 *NIPO LAVANDERIA - QUADRO DE HORÁRIOS* 🧺\n`;
+    msg += `🗓️ *${selectedDayName || 'Hoje'}*\n\n`;
 
     MACHINES.forEach(m => {
       msg += `🔹 *MÁQUINA ${m}:*\n`;
       TIMES.forEach(t => {
-        const b = slots[`${m}_${t}`];
+        const keyWithDate = `${selectedDateKey}_${m}_${t}`;
+        const legacyKey = `${m}_${t}`;
+        const b = slots[keyWithDate] || (selectedDateKey === todayDateKey ? slots[legacyKey] : null);
         if (!b) {
           msg += `   • *${t}:* _Livre ✨_\n`;
         } else if (b.confirmed) {
@@ -40,17 +55,22 @@ const ActionBar = ({ slots = {}, onResetBoard, currentDateStr }) => {
       msg += `\n`;
     });
 
-    msg += `⚠️ *Regra:* Confirmar presença entre 2h antes e 25min depois do horário marcado para não perder a vaga!\n`;
-    msg += `🔗 Acesse para agendar: https://nipo-food.netlify.app`;
+    msg += `⚠️ *Regra:* Confirmar presença no app dentro do horário de tolerância (até 25min após início) para não perder a vaga!\n`;
+    msg += `🔄 *Reset:* Automático todo domingo às 23:59.\n`;
+    msg += `🔗 Agende qualquer dia da semana: https://aesthetic-daffodil-24b59a.netlify.app/`;
 
     navigator.clipboard.writeText(msg);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleManualReset = () => {
-    if (window.confirm("Deseja realmente ZERAR todos os agendamentos das máquinas de lavar agora?")) {
-      onResetBoard();
+  const handleResetClick = () => {
+    if (!isAdmin) {
+      onOpenAdmin();
+    } else {
+      if (window.confirm(`Deseja ZERAR os horários de ${selectedDayName}? (Para zerar a semana toda, acesse o painel Admin no topo)`)) {
+        onResetBoard();
+      }
     }
   };
 
@@ -69,10 +89,10 @@ const ActionBar = ({ slots = {}, onResetBoard, currentDateStr }) => {
       <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
         <div>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>
-            Ocupação Hoje
+            Vagas em {selectedDayName ? selectedDayName.split(' ')[0] : 'Hoje'}
           </span>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            {totalBooked} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/ 9 vagas</span>
+            {dayBooked} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/ 9 vagas</span>
           </span>
         </div>
 
@@ -83,7 +103,7 @@ const ActionBar = ({ slots = {}, onResetBoard, currentDateStr }) => {
             Confirmados
           </span>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-success)' }}>
-            {totalConfirmed}
+            {dayConfirmed}
           </span>
         </div>
 
@@ -91,10 +111,10 @@ const ActionBar = ({ slots = {}, onResetBoard, currentDateStr }) => {
 
         <div>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>
-            Vagas Livres
+            Total na Semana
           </span>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary)' }}>
-            {9 - totalBooked}
+            {totalWeekBookings} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>reservas</span>
           </span>
         </div>
       </div>
@@ -111,12 +131,13 @@ const ActionBar = ({ slots = {}, onResetBoard, currentDateStr }) => {
         </button>
 
         <button 
-          onClick={handleManualReset}
+          onClick={handleResetClick}
           className="btn btn-secondary"
           style={{ fontSize: '0.85rem' }}
-          title="Zerar todos os agendamentos manualmente"
+          title={isAdmin ? "Zerar quadro" : "Acesso de Admin (Senha 1531) para zerar"}
         >
-          <RotateCcw size={15} /> Zerar Quadro
+          {isAdmin ? <RotateCcw size={15} /> : <ShieldCheck size={15} color="#F59E0B" />}
+          <span>{isAdmin ? "Zerar Este Dia" : "Zerar Quadro (Admin)"}</span>
         </button>
       </div>
 

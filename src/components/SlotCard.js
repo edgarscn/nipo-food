@@ -1,34 +1,75 @@
 import React from 'react';
-import { Clock, CheckCircle2, AlertTriangle, User, Plus, X, Sun, Sunset, Moon, Sparkles } from 'lucide-react';
+import { Clock, CheckCircle2, AlertTriangle, User, Plus, X, Sun, Sunset, Moon, Sparkles, Calendar, ShieldCheck } from 'lucide-react';
 
 const SLOT_CONFIGS = {
-  "08:00": { minutes: 480, period: "Manhã", windowOpen: "6:30", windowClose: "8h25", icon: Sun, color: "#00B4D8" },
-  "14:00": { minutes: 840, period: "Tarde", windowOpen: "12:30", windowClose: "14h25", icon: Sunset, color: "#F59E0B" },
-  "21:00": { minutes: 1260, period: "Noite", windowOpen: "19:30", windowClose: "21h25", icon: Moon, color: "#8B5CF6" }
+  "08:00": { 
+    minutes: 480, 
+    period: "Manhã", 
+    windowOpen: "6:30", 
+    windowClose: "8h25", 
+    openMin: 390, 
+    closeMin: 505, 
+    icon: Sun, 
+    color: "#00B4D8" 
+  },
+  "14:00": { 
+    minutes: 840, 
+    period: "Tarde", 
+    windowOpen: "12:30", 
+    windowClose: "14h25", 
+    openMin: 750, 
+    closeMin: 865, 
+    icon: Sunset, 
+    color: "#F59E0B" 
+  },
+  "21:00": { 
+    minutes: 1260, 
+    period: "Noite", 
+    windowOpen: "19:30", 
+    windowClose: "21h25", 
+    openMin: 1170, 
+    closeMin: 1285, 
+    icon: Moon, 
+    color: "#8B5CF6" 
+  }
 };
 
 const SlotCard = ({ 
   machineId, 
   time, 
+  dateKey,
+  todayDateKey,
+  dayName,
   booking, 
   currentTime, 
   currentUserName, 
+  isAdmin,
   onBook, 
   onConfirm, 
   onCancel 
 }) => {
-  const config = SLOT_CONFIGS[time] || { minutes: 0, period: "", windowOpen: "", windowClose: "" };
+  const config = SLOT_CONFIGS[time] || { 
+    minutes: 0, 
+    period: "", 
+    windowOpen: "", 
+    windowClose: "",
+    openMin: 0,
+    closeMin: 0
+  };
+
+  const isToday = dateKey === todayDateKey;
+  const isFutureDay = dateKey > todayDateKey;
+  const isPastDay = dateKey < todayDateKey;
+
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
-  const windowOpenMin = config.minutes - 120; // abre 2h antes (ou 90 min)
-  const windowCloseMin = config.minutes + 25;  // 25min depois
-
-  const isWindowOpen = currentMinutes >= windowOpenMin && currentMinutes <= windowCloseMin;
-  const isPastSlot = currentMinutes > (config.minutes + 150); // mais de 2h30 após o início
+  // Confirmation window only applies on the actual day
+  const isWindowOpen = isToday && (currentMinutes >= config.openMin && currentMinutes <= config.closeMin);
+  const isPastSlotToday = isToday && (currentMinutes > (config.minutes + 150));
 
   const PeriodIcon = config.icon || Clock;
 
-  // Render if slot is free
+  // Render when slot is FREE
   if (!booking) {
     return (
       <div className="slot-card free animate-fade-in" style={{
@@ -36,7 +77,8 @@ const SlotCard = ({
         flexDirection: 'column',
         justifyContent: 'space-between',
         minHeight: '145px',
-        gap: '12px'
+        gap: '12px',
+        opacity: isPastDay ? 0.6 : 1
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -66,35 +108,49 @@ const SlotCard = ({
             fontSize: '0.75rem',
             padding: '3px 8px',
             borderRadius: '12px',
-            background: 'rgba(16, 185, 129, 0.12)',
-            color: 'var(--color-success)',
+            background: isPastDay ? 'rgba(255, 255, 255, 0.05)' : 'rgba(16, 185, 129, 0.12)',
+            color: isPastDay ? 'var(--text-muted)' : 'var(--color-success)',
             fontWeight: 700,
-            border: '1px solid rgba(16, 185, 129, 0.3)'
+            border: `1px solid ${isPastDay ? 'var(--border-color)' : 'rgba(16, 185, 129, 0.3)'}`
           }}>
-            Livre ✨
+            {isPastDay ? 'Encerrado' : 'Livre ✨'}
           </span>
         </div>
 
         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          {isPastSlot ? (
-            <span>Turno já transcorrido hoje</span>
+          {isPastDay ? (
+            <span>Dia já transcorrido</span>
+          ) : isFutureDay ? (
+            <span>Disponível para {dayName}</span>
+          ) : isPastSlotToday ? (
+            <span>Horário de hoje já transcorrido</span>
           ) : (
             <span>Confirmação: {config.windowOpen} até {config.windowClose}</span>
           )}
         </div>
 
-        <button 
-          onClick={() => onBook(machineId, time)}
-          className="btn btn-primary"
-          style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem' }}
-        >
-          <Plus size={16} /> Reservar Horário
-        </button>
+        {isPastDay ? (
+          <button 
+            disabled
+            className="btn btn-secondary"
+            style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem', opacity: 0.5, cursor: 'not-allowed' }}
+          >
+            Encerrado
+          </button>
+        ) : (
+          <button 
+            onClick={() => onBook(machineId, time, dateKey, dayName)}
+            className="btn btn-primary"
+            style={{ width: '100%', padding: '9px 14px', fontSize: '0.85rem' }}
+          >
+            <Plus size={16} /> Reservar Horário
+          </button>
+        )}
       </div>
     );
   }
 
-  // Render when booked
+  // Render when slot is BOOKED
   const isConfirmed = booking.confirmed;
   const isCurrentUser = currentUserName && booking.userName && booking.userName.toLowerCase() === currentUserName.toLowerCase();
 
@@ -104,7 +160,8 @@ const SlotCard = ({
       flexDirection: 'column',
       justifyContent: 'space-between',
       minHeight: '145px',
-      gap: '12px'
+      gap: '12px',
+      opacity: isPastDay ? 0.75 : 1
     }}>
       
       {/* Top Header */}
@@ -134,7 +191,18 @@ const SlotCard = ({
           </div>
 
           {/* Status Badge */}
-          {isConfirmed ? (
+          {isPastDay ? (
+            <span style={{
+              fontSize: '0.75rem',
+              padding: '3px 8px',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-muted)',
+              fontWeight: 600
+            }}>
+              Concluído
+            </span>
+          ) : isConfirmed ? (
             <span style={{
               fontSize: '0.75rem',
               padding: '3px 8px',
@@ -164,6 +232,18 @@ const SlotCard = ({
             }}>
               <AlertTriangle size={12} /> Confirmar Agora!
             </span>
+          ) : isFutureDay ? (
+            <span style={{
+              fontSize: '0.75rem',
+              padding: '3px 8px',
+              borderRadius: '12px',
+              background: 'rgba(0, 180, 216, 0.15)',
+              color: 'var(--color-primary)',
+              fontWeight: 700,
+              border: '1px solid var(--border-color)'
+            }}>
+              Agendado
+            </span>
           ) : (
             <span style={{
               fontSize: '0.75rem',
@@ -174,7 +254,7 @@ const SlotCard = ({
               fontWeight: 600,
               border: '1px solid var(--border-color)'
             }}>
-              Agendado
+              Aguardando Horário
             </span>
           )}
         </div>
@@ -200,10 +280,14 @@ const SlotCard = ({
               {booking.userName} {isCurrentUser && <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}>(Você)</span>}
             </h4>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              {isConfirmed ? (
+              {isPastDay ? (
+                `Reservado para ${dayName}`
+              ) : isConfirmed ? (
                 `Confirmado às ${booking.confirmedAt || 'hoje'}`
               ) : isWindowOpen ? (
                 `Confirmação fecha às ${config.windowClose}!`
+              ) : isFutureDay ? (
+                `Confirmação no dia (${config.windowOpen} até ${config.windowClose})`
               ) : (
                 `Confirmar de ${config.windowOpen} até ${config.windowClose}`
               )}
@@ -218,7 +302,7 @@ const SlotCard = ({
         {/* If pending confirmation & window is open: BIG Confirm Button! */}
         {!isConfirmed && isWindowOpen && (
           <button 
-            onClick={() => onConfirm(machineId, time)}
+            onClick={() => onConfirm(machineId, time, dateKey)}
             className="btn btn-warning"
             style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', fontWeight: 800 }}
           >
@@ -227,7 +311,7 @@ const SlotCard = ({
         )}
 
         {/* Already Confirmed Banner */}
-        {isConfirmed && (
+        {isConfirmed && !isPastDay && (
           <div style={{
             flex: 1,
             display: 'flex',
@@ -241,8 +325,8 @@ const SlotCard = ({
           </div>
         )}
 
-        {/* If window not open yet */}
-        {!isConfirmed && !isWindowOpen && (
+        {/* Future day notice */}
+        {isFutureDay && !isConfirmed && (
           <div style={{
             flex: 1,
             display: 'flex',
@@ -250,18 +334,32 @@ const SlotCard = ({
             fontSize: '0.75rem',
             color: 'var(--text-muted)'
           }}>
-            Confirmar de {config.windowOpen} até {config.windowClose}
+            Confirmar no dia às {config.windowOpen}
+          </div>
+        )}
+
+        {/* Past day notice */}
+        {isPastDay && (
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)'
+          }}>
+            Agendamento encerrado
           </div>
         )}
 
         {/* Cancel / Release Button */}
         <button 
-          onClick={() => onCancel(machineId, time)}
+          onClick={() => onCancel(machineId, time, dateKey, dayName)}
           className="btn btn-danger"
           style={{ padding: '8px 10px', fontSize: '0.8rem' }}
-          title="Liberar este horário"
+          title={isAdmin ? "Liberar este horário (Ação de Administrador)" : "Liberar este horário"}
         >
-          <X size={15} /> Liberar
+          {isAdmin ? <ShieldCheck size={14} /> : <X size={15} />}
+          <span style={{ marginLeft: '4px' }}>Liberar</span>
         </button>
 
       </div>

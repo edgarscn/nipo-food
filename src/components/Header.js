@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Waves, Sun, Moon, Wifi, Smartphone, User, RefreshCw, Clock } from 'lucide-react';
+import { Waves, Sun, Moon, Wifi, Smartphone, User, RefreshCw, Clock, ShieldCheck } from 'lucide-react';
 
 const Header = ({ 
   currentUserName, 
@@ -8,7 +8,9 @@ const Header = ({
   toggleTheme, 
   currentTime, 
   isSyncing, 
-  onManualRefresh 
+  onManualRefresh,
+  isAdmin,
+  onOpenAdmin
 }) => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [canInstallPWA, setCanInstallPWA] = useState(false);
@@ -111,6 +113,25 @@ const Header = ({
         >
           <User size={15} color="var(--color-primary)" />
           <span>{currentUserName ? currentUserName : "Definir meu nome"}</span>
+        </button>
+
+        {/* Admin Access Button */}
+        <button
+          onClick={onOpenAdmin}
+          className="btn btn-secondary"
+          style={{
+            padding: '6px 12px',
+            fontSize: '0.85rem',
+            borderRadius: '20px',
+            background: isAdmin ? 'rgba(245, 158, 11, 0.18)' : undefined,
+            color: isAdmin ? '#F59E0B' : undefined,
+            borderColor: isAdmin ? '#F59E0B' : undefined,
+            fontWeight: isAdmin ? 700 : 500
+          }}
+          title={isAdmin ? "Painel de Administrador (Autenticado)" : "Acesso de Administrador"}
+        >
+          <ShieldCheck size={16} color={isAdmin ? "#F59E0B" : "var(--color-primary)"} />
+          <span>{isAdmin ? "Admin 👑" : "Admin"}</span>
         </button>
 
         {/* Sync Indicator / Refresh */}

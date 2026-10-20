@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Plus, Waves, Clock } from 'lucide-react';
+import { X, User, Plus, Waves, Clock, Calendar } from 'lucide-react';
 
 const SLOT_DEADLINE_INFO = {
-  "08:00": "você tem de 6:30 até 8h25 para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.",
-  "14:00": "você tem de 12:30 até 14h25 para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.",
-  "21:00": "você tem de 19:30 até 21h25 para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa."
+  "08:00": { window: "6:30 até 8h25", text: "você tem de 6:30 até 8h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." },
+  "14:00": { window: "12:30 até 14h25", text: "você tem de 12:30 até 14h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." },
+  "21:00": { window: "19:30 até 21h25", text: "você tem de 19:30 até 21h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." }
 };
 
 const BookingModal = ({ 
   isOpen, 
   onClose, 
-  targetSlot, // { machineId, time }
+  targetSlot, // { machineId, time, dateKey, dayName, isFutureDay }
   savedUserName, 
   onConfirmBooking 
 }) => {
@@ -33,12 +33,14 @@ const BookingModal = ({
       setError("Por favor, digite seu nome.");
       return;
     }
-    onConfirmBooking(targetSlot.machineId, targetSlot.time, cleanName);
+    onConfirmBooking(targetSlot.machineId, targetSlot.time, targetSlot.dateKey, cleanName);
     onClose();
   };
 
-  const deadlineMessage = SLOT_DEADLINE_INFO[targetSlot.time] || 
-    `você tem até 25min após às ${targetSlot.time} para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.`;
+  const deadlineConfig = SLOT_DEADLINE_INFO[targetSlot.time] || {
+    window: `até 25min após às ${targetSlot.time}`,
+    text: `você tem até 25min após às ${targetSlot.time} para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.`
+  };
 
   return (
     <div style={{
@@ -82,9 +84,15 @@ const BookingModal = ({
               <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', margin: 0 }}>
                 Reservar Máquina {targetSlot.machineId}
               </h3>
-              <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Clock size={13} /> Horário: <strong>{targetSlot.time}</strong>
-              </span>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  <Calendar size={13} /> {targetSlot.dayName || 'Hoje'}
+                </span>
+                <span>•</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  <Clock size={13} /> {targetSlot.time}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -130,7 +138,7 @@ const BookingModal = ({
             color: 'var(--text-secondary)',
             lineHeight: 1.45
           }}>
-            ℹ️ <strong>Lembrete importante:</strong> {deadlineMessage}
+            ℹ️ <strong>Lembrete importante:</strong> {deadlineConfig.text}
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>

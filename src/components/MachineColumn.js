@@ -7,14 +7,22 @@ const TIMES = ["08:00", "14:00", "21:00"];
 const MachineColumn = ({ 
   machineId, 
   slots = {}, 
+  dateKey,
+  todayDateKey,
+  dayName,
   currentTime, 
   currentUserName, 
+  isAdmin,
   onBook, 
   onConfirm, 
   onCancel 
 }) => {
-  // Count how many confirmed/booked slots this machine has today
-  const bookedCount = TIMES.filter(time => slots[`${machineId}_${time}`]).length;
+  // Count how many confirmed/booked slots this machine has on this selected day
+  const bookedCount = TIMES.filter(time => {
+    const keyWithDate = `${dateKey}_${machineId}_${time}`;
+    const legacyKey = `${machineId}_${time}`;
+    return slots[keyWithDate] || (dateKey === todayDateKey && slots[legacyKey]);
+  }).length;
 
   return (
     <div className="glass-panel animate-fade-in" style={{
@@ -72,17 +80,22 @@ const MachineColumn = ({
       {/* The 3 slots (08:00, 14:00, 21:00) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {TIMES.map(time => {
-          const slotKey = `${machineId}_${time}`;
-          const booking = slots[slotKey] || null;
+          const keyWithDate = `${dateKey}_${machineId}_${time}`;
+          const legacyKey = `${machineId}_${time}`;
+          const booking = slots[keyWithDate] || (dateKey === todayDateKey ? slots[legacyKey] : null);
 
           return (
             <SlotCard
-              key={slotKey}
+              key={`${dateKey}_${machineId}_${time}`}
               machineId={machineId}
               time={time}
+              dateKey={dateKey}
+              todayDateKey={todayDateKey}
+              dayName={dayName}
               booking={booking}
               currentTime={currentTime}
               currentUserName={currentUserName}
+              isAdmin={isAdmin}
               onBook={onBook}
               onConfirm={onConfirm}
               onCancel={onCancel}

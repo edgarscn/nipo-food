@@ -1,20 +1,65 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Header from '../components/Header';
 import RulesBanner from '../components/RulesBanner';
+import WeekSelector from '../components/WeekSelector';
 import MachineColumn from '../components/MachineColumn';
 import BookingModal from '../components/BookingModal';
 import UserNameModal from '../components/UserNameModal';
+import AdminModal from '../components/AdminModal';
 import ActionBar from '../components/ActionBar';
 import '../styles/global.css';
 
-const SYNC_API_ENDPOINT = "https://api.restful-api.dev/objects/ff808181a09d98f701a1594354602d55";
+const SYNC_API_ENDPOINT = "https://extendsclass.com/api/json-storage/bin/aaadcbe";
 const MACHINES = [1, 2, 4];
 const TIMES = ["08:00", "14:00", "21:00"];
 
-const SLOT_MINUTES = {
-  "08:00": 480,
-  "14:00": 840,
-  "21:00": 1260
+const SLOT_CONFIGS = {
+  "08:00": { openMin: 390, closeMin: 505 },   // 6:30 até 8h25
+  "14:00": { openMin: 750, closeMin: 865 },   // 12:30 até 14h25
+  "21:00": { openMin: 1170, closeMin: 1285 }  // 19:30 até 21h25
+};
+
+const formatDateKey = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getWeekDates = (baseDate = new Date()) => {
+  const d = new Date(baseDate);
+  const day = d.getDay(); // 0 is Sunday, 1 is Monday...
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const weekDays = [];
+  const dayNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+  const shortNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+  for (let i = 0; i < 7; i++) {
+    const current = new Date(monday);
+    current.setDate(monday.getDate() + i);
+    const dateKey = formatDateKey(current);
+
+    weekDays.push({
+      dateKey,
+      dayName: dayNames[i],
+      shortName: shortNames[i],
+      dayNumber: String(current.getDate()).padStart(2, '0'),
+      monthNumber: String(current.getMonth() + 1).padStart(2, '0'),
+      dateObj: current
+    });
+  }
+
+  return {
+    mondayKey: weekDays[0].dateKey,
+    sundayKey: weekDays[6].dateKey,
+    weekDays
+  };
 };
 
 const IndexPage = () => {
@@ -22,13 +67,33 @@ const IndexPage = () => {
   const [currentUserName, setCurrentUserName] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [slots, setSlots] = useState({});
-  const [boardDate, setBoardDate] = useState('');
+  const [weekStart, setWeekStart] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Today and Selected Date Keys
+  const todayDateKey = useMemo(() => formatDateKey(currentTime), [currentTime]);
+  const [selectedDateKey, setSelectedDateKey] = useState(todayDateKey);
+
+  // Compute Current Week Days
+  const { mondayKey, weekDays } = useMemo(() => getWeekDates(currentTime), [currentTime]);
+
+  // Selected Day Details
+  const selectedDay = useMemo(() => {
+    return weekDays.find(d => d.dateKey === selectedDateKey) || {
+      dateKey: selectedDateKey,
+      dayName: 'Hoje',
+      shortName: 'Hoje',
+      dayNumber: '',
+      monthNumber: ''
+    };
+  }, [weekDays, selectedDateKey]);
 
   // Modals
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [targetSlot, setTargetSlot] = useState(null);
   const [userNameModalOpen, setUserNameModalOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const lastSyncTimestamp = useRef(0);
 
@@ -53,21 +118,23 @@ const IndexPage = () => {
       const savedUser = localStorage.getItem('nipo_laundry_user_name') || '';
       setCurrentUserName(savedUser);
 
-      const savedDate = localStorage.getItem('nipo_laundry_date');
+      const savedAdmin = sessionStorage.getItem('nipo_laundry_admin_auth') === 'true';
+      setIsAdmin(savedAdmin);
+
+      const savedWeekStart = localStorage.getItem('nipo_laundry_week_start');
       const savedSlots = localStorage.getItem('nipo_laundry_slots');
 
-      const today = new Date().toLocaleDateString('pt-BR');
-      if (savedDate === today && savedSlots) {
-        setBoardDate(savedDate);
+      if (savedWeekStart === mondayKey && savedSlots) {
+        setWeekStart(savedWeekStart);
         setSlots(JSON.parse(savedSlots));
       } else {
-        setBoardDate(today);
+        setWeekStart(mondayKey);
         setSlots({});
       }
     } catch (e) {
       console.error("Erro ao carregar dados locais", e);
     }
-  }, []);
+  }, [mondayKey]);
 
   // 3. Real-Time Cloud Synchronization
   const fetchCloudState = async () => {
@@ -75,24 +142,25 @@ const IndexPage = () => {
       setIsSyncing(true);
       const res = await fetch(SYNC_API_ENDPOINT, { cache: 'no-store' });
       if (!res.ok) return;
-      const json = await res.json();
-      const cloudData = json.data;
+      const cloudData = await res.json();
+      
       if (cloudData && cloudData.updatedAt && cloudData.updatedAt > lastSyncTimestamp.current) {
         lastSyncTimestamp.current = cloudData.updatedAt;
-        const today = new Date().toLocaleDateString('pt-BR');
 
-        // Check if cloud state is from today or needs daily reset
-        if (cloudData.date === today && cloudData.slots) {
+        // Check if cloud state matches current week
+        if (cloudData.weekStart === mondayKey && cloudData.slots) {
           setSlots(cloudData.slots);
-          setBoardDate(cloudData.date);
+          setWeekStart(cloudData.weekStart);
           localStorage.setItem('nipo_laundry_slots', JSON.stringify(cloudData.slots));
-          localStorage.setItem('nipo_laundry_date', cloudData.date);
-        } else if (cloudData.date !== today) {
-          // Cloud state is from another day, reset for today
+          localStorage.setItem('nipo_laundry_week_start', cloudData.weekStart);
+        } else if (cloudData.weekStart !== mondayKey) {
+          // Cloud state is from a previous week! Automated week reset for Sunday 23:59 rollover
           const freshSlots = {};
           setSlots(freshSlots);
-          setBoardDate(today);
-          syncToCloud(freshSlots, today);
+          setWeekStart(mondayKey);
+          localStorage.setItem('nipo_laundry_slots', JSON.stringify(freshSlots));
+          localStorage.setItem('nipo_laundry_week_start', mondayKey);
+          syncToCloud(freshSlots, mondayKey);
         }
       }
     } catch (e) {
@@ -102,17 +170,14 @@ const IndexPage = () => {
     }
   };
 
-  const syncToCloud = async (newSlots, newDate) => {
+  const syncToCloud = async (newSlots, newWeekStart) => {
     const timestamp = Date.now();
     lastSyncTimestamp.current = timestamp;
-    const dateToSave = newDate || boardDate || new Date().toLocaleDateString('pt-BR');
+    const weekStartToSave = newWeekStart || weekStart || mondayKey;
     const payload = {
-      name: "nipo_laundry",
-      data: {
-        date: dateToSave,
-        slots: newSlots,
-        updatedAt: timestamp
-      }
+      weekStart: weekStartToSave,
+      slots: newSlots,
+      updatedAt: timestamp
     };
 
     try {
@@ -129,17 +194,17 @@ const IndexPage = () => {
     }
   };
 
-  // 4. Polling & Focus listener
+  // 4. Polling & Window Focus Listener
   useEffect(() => {
     fetchCloudState();
-    const interval = setInterval(fetchCloudState, 3500);
+    const interval = setInterval(fetchCloudState, 12000); // 12 seconds interval
     const handleFocus = () => fetchCloudState();
     window.addEventListener('focus', handleFocus);
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [boardDate]);
+  }, [mondayKey]);
 
   // 5. Background Clock & Automated Rules Check (Every 1 second)
   useEffect(() => {
@@ -147,25 +212,23 @@ const IndexPage = () => {
       const now = new Date();
       setCurrentTime(now);
 
-      const today = now.toLocaleDateString('pt-BR');
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const currentMinutes = hours * 60 + minutes;
+      const isSunday = now.getDay() === 0;
 
-      // RULE 1: Daily Reset at 23:59 or when date changes
-      if (currentMinutes >= 23 * 60 + 59 || (boardDate && boardDate !== today)) {
+      // RULE 1: Automatic Reset every Sunday at 23:59
+      if (isSunday && hours === 23 && minutes >= 59) {
         if (Object.keys(slots).length > 0) {
           const emptySlots = {};
           setSlots(emptySlots);
-          setBoardDate(today);
           localStorage.setItem('nipo_laundry_slots', JSON.stringify(emptySlots));
-          localStorage.setItem('nipo_laundry_date', today);
-          syncToCloud(emptySlots, today);
+          syncToCloud(emptySlots, mondayKey);
           return;
         }
       }
 
-      // RULE 2: Auto-Release unconfirmed slots (Tolerance window: 25 min after slot)
+      // RULE 2: Auto-Release unconfirmed slots for TODAY (Tolerance: up to 25 min after slot start)
       let needsAutoRelease = false;
       const updatedSlots = { ...slots };
 
@@ -173,13 +236,20 @@ const IndexPage = () => {
         const booking = updatedSlots[key];
         if (booking && !booking.confirmed) {
           const parts = key.split('_');
-          const slotTime = parts[1]; // e.g. "08:00"
-          const slotMin = SLOT_MINUTES[slotTime];
+          let slotDateKey = todayDateKey;
+          let slotTime = "08:00";
 
-          if (slotMin !== undefined) {
-            const windowCloseMin = slotMin + 25; // 25min após o horário marcado
-            // If current time passed windowCloseMin and booking was not confirmed:
-            if (currentMinutes > windowCloseMin) {
+          if (parts.length >= 3) {
+            slotDateKey = parts[0];
+            slotTime = parts[2];
+          } else if (parts.length === 2) {
+            slotTime = parts[1];
+          }
+
+          // Auto-release only applies to slots on TODAY
+          if (slotDateKey === todayDateKey) {
+            const config = SLOT_CONFIGS[slotTime];
+            if (config && currentMinutes > config.closeMin) {
               delete updatedSlots[key];
               needsAutoRelease = true;
             }
@@ -196,7 +266,32 @@ const IndexPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [slots, boardDate]);
+  }, [slots, mondayKey, todayDateKey]);
+
+  // Compute counts of reservations per day
+  const bookingsCountByDay = useMemo(() => {
+    const counts = {};
+    weekDays.forEach(day => { counts[day.dateKey] = 0; });
+
+    Object.keys(slots).forEach(key => {
+      if (slots[key] && slots[key].userName) {
+        const parts = key.split('_');
+        if (parts.length >= 3) {
+          const dKey = parts[0];
+          if (counts[dKey] !== undefined) {
+            counts[dKey]++;
+          }
+        } else {
+          // Legacy key for today
+          if (counts[todayDateKey] !== undefined) {
+            counts[todayDateKey]++;
+          }
+        }
+      }
+    });
+
+    return counts;
+  }, [slots, weekDays, todayDateKey]);
 
   // Actions
   const toggleTheme = () => {
@@ -211,28 +306,41 @@ const IndexPage = () => {
     localStorage.setItem('nipo_laundry_user_name', name);
   };
 
-  // Open booking modal for slot
-  const handleOpenBookModal = (machineId, time) => {
-    setTargetSlot({ machineId, time });
+  const handleAdminLogin = () => {
+    setIsAdmin(true);
+    sessionStorage.setItem('nipo_laundry_admin_auth', 'true');
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    sessionStorage.removeItem('nipo_laundry_admin_auth');
+  };
+
+  // Open booking modal
+  const handleOpenBookModal = (machineId, time, dateKey, dayName) => {
+    setTargetSlot({ 
+      machineId, 
+      time, 
+      dateKey: dateKey || selectedDateKey, 
+      dayName: dayName || selectedDay.dayName 
+    });
     setBookingModalOpen(true);
   };
 
   // Confirm booking submission
-  const handleConfirmBooking = (machineId, time, name) => {
+  const handleConfirmBooking = (machineId, time, dateKey, name) => {
     handleSaveUserName(name);
 
-    const slotKey = `${machineId}_${time}`;
-    const slotMin = SLOT_MINUTES[time];
+    const slotKey = `${dateKey}_${machineId}_${time}`;
+    const isToday = dateKey === todayDateKey;
     const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-
-    const windowOpenMin = slotMin - 120;
-    const windowCloseMin = slotMin + 25;
-    const isWindowOpen = currentMinutes >= windowOpenMin && currentMinutes <= windowCloseMin;
+    const config = SLOT_CONFIGS[time];
+    const isWindowOpen = isToday && config && (currentMinutes >= config.openMin && currentMinutes <= config.closeMin);
 
     const newBooking = {
       userName: name,
       bookedAt: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      confirmed: isWindowOpen, // If booking directly during the window, auto-confirm
+      confirmed: isWindowOpen, // If booking directly during the window today, auto-confirm
       confirmedAt: isWindowOpen ? currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
     };
 
@@ -247,9 +355,11 @@ const IndexPage = () => {
   };
 
   // Confirm attendance (Check-in)
-  const handleConfirmAttendance = (machineId, time) => {
-    const slotKey = `${machineId}_${time}`;
-    const existing = slots[slotKey];
+  const handleConfirmAttendance = (machineId, time, dateKey) => {
+    const keyWithDate = `${dateKey}_${machineId}_${time}`;
+    const legacyKey = `${machineId}_${time}`;
+    const targetKey = slots[keyWithDate] ? keyWithDate : (slots[legacyKey] ? legacyKey : keyWithDate);
+    const existing = slots[targetKey];
     if (!existing) return;
 
     const updatedBooking = {
@@ -260,7 +370,7 @@ const IndexPage = () => {
 
     const nextSlots = {
       ...slots,
-      [slotKey]: updatedBooking
+      [targetKey]: updatedBooking
     };
 
     setSlots(nextSlots);
@@ -269,14 +379,16 @@ const IndexPage = () => {
   };
 
   // Cancel reservation
-  const handleCancelBooking = (machineId, time) => {
-    const slotKey = `${machineId}_${time}`;
-    const existing = slots[slotKey];
+  const handleCancelBooking = (machineId, time, dateKey, dayName) => {
+    const keyWithDate = `${dateKey}_${machineId}_${time}`;
+    const legacyKey = `${machineId}_${time}`;
+    const targetKey = slots[keyWithDate] ? keyWithDate : (slots[legacyKey] ? legacyKey : keyWithDate);
+    const existing = slots[targetKey];
     const name = existing ? existing.userName : 'este horário';
 
     if (window.confirm(`Deseja realmente liberar a Máquina ${machineId} às ${time} (${name})?`)) {
       const nextSlots = { ...slots };
-      delete nextSlots[slotKey];
+      delete nextSlots[targetKey];
 
       setSlots(nextSlots);
       localStorage.setItem('nipo_laundry_slots', JSON.stringify(nextSlots));
@@ -284,17 +396,38 @@ const IndexPage = () => {
     }
   };
 
-  // Reset entire board
-  const handleResetEntireBoard = () => {
+  // Admin: Reset entire week
+  const handleResetEntireWeek = () => {
     const empty = {};
     setSlots(empty);
     localStorage.setItem('nipo_laundry_slots', JSON.stringify(empty));
     syncToCloud(empty);
   };
 
+  // Admin: Reset selected day
+  const handleResetSelectedDay = () => {
+    const nextSlots = { ...slots };
+    const prefix = `${selectedDateKey}_`;
+
+    Object.keys(nextSlots).forEach(key => {
+      if (key.startsWith(prefix)) {
+        delete nextSlots[key];
+      } else if (selectedDateKey === todayDateKey && !key.includes('-')) {
+        // Legacy keys for today
+        delete nextSlots[key];
+      }
+    });
+
+    setSlots(nextSlots);
+    localStorage.setItem('nipo_laundry_slots', JSON.stringify(nextSlots));
+    syncToCloud(nextSlots);
+  };
+
+  const totalWeekBookings = Object.keys(slots).filter(k => slots[k] && slots[k].userName).length;
+
   return (
     <div style={{ minHeight: '100vh', padding: '16px 12px 48px 12px' }}>
-      <div style={{ maxWidth: '1020px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
         
         {/* Top Header */}
         <Header 
@@ -305,12 +438,23 @@ const IndexPage = () => {
           currentTime={currentTime}
           isSyncing={isSyncing}
           onManualRefresh={fetchCloudState}
+          isAdmin={isAdmin}
+          onOpenAdmin={() => setAdminModalOpen(true)}
         />
 
         {/* Rules Explainer */}
         <RulesBanner />
 
-        {/* 3 Machines Grid (1, 2, 4) */}
+        {/* 7-Day Week Navigation Pill Bar */}
+        <WeekSelector 
+          weekDays={weekDays}
+          selectedDateKey={selectedDateKey}
+          onSelectDate={setSelectedDateKey}
+          todayDateKey={todayDateKey}
+          bookingsCountByDay={bookingsCountByDay}
+        />
+
+        {/* 3 Machines Grid (1, 2, 4) for the selected day */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
@@ -319,11 +463,15 @@ const IndexPage = () => {
         }}>
           {MACHINES.map(mId => (
             <MachineColumn
-              key={mId}
+              key={`${selectedDateKey}_${mId}`}
               machineId={mId}
               slots={slots}
+              dateKey={selectedDateKey}
+              todayDateKey={todayDateKey}
+              dayName={selectedDay.dayName}
               currentTime={currentTime}
               currentUserName={currentUserName}
+              isAdmin={isAdmin}
               onBook={handleOpenBookModal}
               onConfirm={handleConfirmAttendance}
               onCancel={handleCancelBooking}
@@ -334,8 +482,12 @@ const IndexPage = () => {
         {/* Action Bar & Stats */}
         <ActionBar 
           slots={slots}
-          onResetBoard={handleResetEntireBoard}
-          currentDateStr={currentTime.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          selectedDateKey={selectedDateKey}
+          selectedDayName={selectedDay.dayName}
+          todayDateKey={todayDateKey}
+          isAdmin={isAdmin}
+          onOpenAdmin={() => setAdminModalOpen(true)}
+          onResetBoard={handleResetSelectedDay}
         />
 
         {/* Footer */}
@@ -348,10 +500,10 @@ const IndexPage = () => {
           fontSize: '0.85rem'
         }}>
           <p style={{ marginBottom: '4px' }}>
-            🧺 <strong>Nipo Lavanderia</strong> • Máquinas 1, 2 e 4
+            🧺 <strong>Nipo Lavanderia</strong> • Máquinas 1, 2 e 4 • Agendamento Semanal
           </p>
           <p style={{ fontSize: '0.75rem' }}>
-            Reset automático diário às 23:59 • Confirmação obrigatória até 25min após o horário.
+            Reset automático todo domingo às 23:59 • Confirmação de presença até 25min após o horário • Senha Admin: 1531
           </p>
         </footer>
 
@@ -374,6 +526,19 @@ const IndexPage = () => {
         onSaveName={handleSaveUserName}
       />
 
+      {/* Admin Panel Modal */}
+      <AdminModal
+        isOpen={adminModalOpen}
+        onClose={() => setAdminModalOpen(false)}
+        isAdmin={isAdmin}
+        onLoginSuccess={handleAdminLogin}
+        onLogoutAdmin={handleAdminLogout}
+        onResetEntireWeek={handleResetEntireWeek}
+        onResetSelectedDay={handleResetSelectedDay}
+        selectedDayName={selectedDay.dayName}
+        totalWeekBookings={totalWeekBookings}
+      />
+
     </div>
   );
 };
@@ -382,8 +547,8 @@ export default IndexPage;
 
 export const Head = () => (
   <>
-    <title>Nipo Lavanderia - Agendamento das Máquinas de Lavar</title>
-    <meta name="description" content="Sistema inteligente de agendamento e confirmação das máquinas de lavar da república Nipo." />
+    <title>Nipo Lavanderia - Agendamento Semanal das Máquinas de Lavar</title>
+    <meta name="description" content="Sistema inteligente de agendamento semanal e confirmação das máquinas de lavar da república Nipo." />
     <meta name="theme-color" content="#0B132B" />
     <link rel="icon" href="/icon.jpg" />
   </>
