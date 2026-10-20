@@ -326,11 +326,10 @@ const SlotCard = ({
   // - RESERVADO (Pending Confirmation) -> AMARELO (#F59E0B)
   // - CONFIRMADO -> VERMELHO (#EF4444)
   const cardBorderColor = isConfirmed ? '#EF4444' : '#F59E0B';
-  const cardBgColor = isConfirmed 
-    ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(28, 37, 65, 0.95) 100%)'
-    : 'linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(28, 37, 65, 0.95) 100%)';
+  const cardBgColor = isConfirmed ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.25)';
+  const cardBgSolid = isConfirmed ? '#2A1115' : '#261D0C';
   const accentColor = isConfirmed ? '#EF4444' : '#F59E0B';
-  const iconBgColor = isConfirmed ? 'rgba(239, 68, 68, 0.22)' : 'rgba(245, 158, 11, 0.22)';
+  const iconBgColor = isConfirmed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)';
   const avatarBgColor = isConfirmed ? '#EF4444' : '#F59E0B';
   const avatarTextColor = isConfirmed ? '#FFFFFF' : '#0B132B';
 
@@ -343,9 +342,10 @@ const SlotCard = ({
         justifyContent: 'space-between',
         minHeight: '155px',
         gap: '12px',
-        border: `1px solid ${cardBorderColor}`,
+        border: `2px solid ${cardBorderColor}`,
+        backgroundColor: cardBgSolid,
         background: cardBgColor,
-        boxShadow: `0 0 16px ${isConfirmed ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'}`,
+        boxShadow: `0 0 20px ${isConfirmed ? 'rgba(239, 68, 68, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
         opacity: isPastDay ? 0.75 : 1
       }}
     >
@@ -367,10 +367,10 @@ const SlotCard = ({
               <PeriodIcon size={18} />
             </div>
             <div>
-              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>
                 {time}
               </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: isConfirmed ? '#FCA5A5' : '#FDE68A', marginLeft: '6px' }}>
                 {config.period}
               </span>
             </div>
@@ -391,56 +391,32 @@ const SlotCard = ({
           ) : isConfirmed ? (
             <span style={{
               fontSize: '0.75rem',
-              padding: '3px 8px',
+              padding: '3px 9px',
               borderRadius: '12px',
-              background: 'rgba(239, 68, 68, 0.22)',
-              color: '#EF4444',
+              background: '#EF4444',
+              color: '#FFFFFF',
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
-              border: '1px solid #EF4444'
+              boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
             }}>
               <CheckCircle2 size={12} /> Confirmado
-            </span>
-          ) : isWindowOpen ? (
-            <span style={{
-              fontSize: '0.75rem',
-              padding: '3px 8px',
-              borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.25)',
-              color: '#F59E0B',
-              fontWeight: 800,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              border: '1px solid #F59E0B'
-            }}>
-              <AlertTriangle size={12} /> Confirmar Agora!
-            </span>
-          ) : isFutureDay ? (
-            <span style={{
-              fontSize: '0.75rem',
-              padding: '3px 8px',
-              borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.2)',
-              color: '#F59E0B',
-              fontWeight: 700,
-              border: '1px solid #F59E0B'
-            }}>
-              Agendado
             </span>
           ) : (
             <span style={{
               fontSize: '0.75rem',
-              padding: '3px 8px',
+              padding: '3px 9px',
               borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.2)',
-              color: '#F59E0B',
-              fontWeight: 600,
-              border: '1px solid #F59E0B'
+              background: '#F59E0B',
+              color: '#0B132B',
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)'
             }}>
-              Aguardando Horário
+              <Clock size={12} /> {isWindowOpen ? 'Confirmar Agora!' : 'Agendado (Pendente)'}
             </span>
           )}
         </div>
@@ -462,10 +438,10 @@ const SlotCard = ({
             {effectiveBooking.userName ? effectiveBooking.userName.charAt(0).toUpperCase() : "?"}
           </div>
           <div>
-            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
-              {effectiveBooking.userName} {isCurrentUser && <span style={{ fontSize: '0.75rem', color: accentColor }}>(Você)</span>}
+            <h4 style={{ fontSize: '1rem', color: '#FFFFFF', margin: 0, lineHeight: 1.2 }}>
+              {effectiveBooking.userName} {isCurrentUser && <span style={{ fontSize: '0.75rem', color: accentColor, fontWeight: 700 }}>(Você)</span>}
             </h4>
-            <span style={{ fontSize: '0.72rem', color: isConfirmed ? '#FCA5A5' : '#FDE68A' }}>
+            <span style={{ fontSize: '0.75rem', color: isConfirmed ? '#FCA5A5' : '#FDE68A', fontWeight: 500 }}>
               {isPastDay ? (
                 `Reservado para ${dayName}`
               ) : isConfirmed ? (
@@ -485,12 +461,25 @@ const SlotCard = ({
       {/* Action Buttons */}
       <div style={{ display: 'flex', gap: '8px' }}>
         
-        {/* If pending confirmation & window is open: BIG Confirm Button! */}
-        {!isConfirmed && isWindowOpen && (
+        {/* If pending confirmation (YELLOW state): BIG Confirm Button to turn it RED! */}
+        {!isConfirmed && !isPastDay && (
           <button 
             onClick={() => onConfirm(machineId, time, dateKey)}
             className="btn btn-warning"
-            style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', fontWeight: 800 }}
+            style={{ 
+              flex: 1, 
+              padding: '8px 12px', 
+              fontSize: '0.85rem', 
+              fontWeight: 800,
+              background: '#F59E0B',
+              color: '#0B132B',
+              border: 'none',
+              boxShadow: '0 2px 10px rgba(245, 158, 11, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
           >
             <CheckCircle2 size={16} /> Confirmar Uso
           </button>
@@ -503,25 +492,11 @@ const SlotCard = ({
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '0.8rem',
+            fontSize: '0.82rem',
             color: '#EF4444',
-            fontWeight: 700
+            fontWeight: 800
           }}>
-            <Sparkles size={14} /> Presença Confirmada (Em Uso)
-          </div>
-        )}
-
-        {/* Future day notice */}
-        {isFutureDay && !isConfirmed && (
-          <div style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '0.75rem',
-            color: '#F59E0B',
-            fontWeight: 500
-          }}>
-            Confirmar no dia às {config.windowOpen}
+            <Sparkles size={15} /> Presença Confirmada (Em Uso)
           </div>
         )}
 

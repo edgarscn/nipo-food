@@ -344,15 +344,13 @@ const IndexPage = () => {
       return;
     }
 
-    const isWindowOpen = isToday && config && (currentMinutes >= config.openMin && currentMinutes <= config.closeMin);
-    const isLastChance = isToday && config && (currentMinutes > config.closeMin && currentMinutes <= config.lockMin);
-    const shouldAutoConfirm = isWindowOpen || isLastChance;
-
+    // All new bookings start as confirmed: false (AMARELO)
+    // Only turns red after the user clicks "Confirmar Uso / Confirmar Presença"
     const newBooking = {
       userName: name,
       bookedAt: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      confirmed: shouldAutoConfirm, // If booking directly during the window or last-chance today, auto-confirm
-      confirmedAt: shouldAutoConfirm ? currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
+      confirmed: false,
+      confirmedAt: null
     };
 
     const nextSlots = {

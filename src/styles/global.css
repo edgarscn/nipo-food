@@ -222,26 +222,30 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Reserved but pending confirmation: AMARELO (Yellow) */
 .slot-card.booked.reserved-pending {
-  border: 1px solid #F59E0B !important;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(28, 37, 65, 0.95) 100%) !important;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.18) !important;
+  border: 2px solid #F59E0B !important;
+  background-color: #261D0C !important;
+  background: rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35) !important;
 }
 
 [data-theme='light'] .slot-card.booked.reserved-pending {
-  background: #FFFBEB !important;
-  border-color: #F59E0B !important;
+  background-color: #FEF3C7 !important;
+  background: #FEF3C7 !important;
+  border: 2px solid #D97706 !important;
 }
 
 /* Confirmed: VERMELHO (Red) */
 .slot-card.booked.confirmed {
-  border: 1px solid #EF4444 !important;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(28, 37, 65, 0.95) 100%) !important;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.18) !important;
+  border: 2px solid #EF4444 !important;
+  background-color: #2A1115 !important;
+  background: rgba(239, 68, 68, 0.25) !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.35) !important;
 }
 
 [data-theme='light'] .slot-card.booked.confirmed {
-  background: #FEF2F2 !important;
-  border-color: #EF4444 !important;
+  background-color: #FEE2E2 !important;
+  background: #FEE2E2 !important;
+  border: 2px solid #DC2626 !important;
 }
 
 .slot-card.needs-confirmation {
