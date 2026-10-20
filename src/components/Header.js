@@ -96,7 +96,7 @@ const Header = ({
           </div>
 
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '2px 0 0 0', textTransform: 'capitalize' }}>
-            {formattedDate} • Máquinas 1, 2 e 4
+            {formattedDate} • Máquinas 1, 3 e 4
           </p>
         </div>
       </div>

@@ -10,7 +10,7 @@ import ActionBar from '../components/ActionBar';
 import '../styles/global.css';
 
 const SYNC_API_ENDPOINT = "https://extendsclass.com/api/json-storage/bin/aaadcbe";
-const MACHINES = [1, 2, 4];
+const MACHINES = [1, 3, 4];
 const TIMES = ["08:00", "14:00", "21:00"];
 
 const SLOT_CONFIGS = {
@@ -463,7 +463,7 @@ const IndexPage = () => {
           bookingsCountByDay={bookingsCountByDay}
         />
 
-        {/* 3 Machines Grid (1, 2, 4) for the selected day */}
+        {/* 3 Machines Grid (1, 3, 4) for the selected day */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
@@ -509,7 +509,7 @@ const IndexPage = () => {
           fontSize: '0.85rem'
         }}>
           <p style={{ marginBottom: '4px' }}>
-            🧺 <strong>Nipo Lavanderia</strong> • Máquinas 1, 2 e 4 • Agendamento Semanal
+            🧺 <strong>Nipo Lavanderia</strong> • Máquinas 1, 3 e 4 • Agendamento Semanal
           </p>
           <p style={{ fontSize: '0.75rem' }}>
             Reset automático todo domingo às 23:59 • Confirmação de presença até 25min após o horário • Senha Admin: 1531

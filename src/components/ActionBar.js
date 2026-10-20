@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Share2, Check, RotateCcw, ShieldCheck, Calendar } from 'lucide-react';
 
-const MACHINES = [1, 2, 4];
+const MACHINES = [1, 3, 4];
 const TIMES = ["08:00", "14:00", "21:00"];
 
 const ActionBar = ({ 

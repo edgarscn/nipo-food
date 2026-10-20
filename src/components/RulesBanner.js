@@ -27,7 +27,7 @@ const RulesBanner = () => {
               Regras de Uso da Lavanderia
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Máquinas 1, 2 e 4 • Toda a semana • Confirmação • Liberação & Trancamento
+              Máquinas 1, 3 e 4 • Toda a semana • Confirmação • Liberação & Trancamento
             </p>
           </div>
         </div>
@@ -66,7 +66,7 @@ const RulesBanner = () => {
             <div>
               <strong style={{ color: 'var(--text-primary)' }}>3 Horários Diários:</strong>
               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Manhã (<strong>08:00</strong>), Tarde (<strong>14:00</strong>) e Noite (<strong>21:00</strong>) para as máquinas 1, 2 e 4.
+                Manhã (<strong>08:00</strong>), Tarde (<strong>14:00</strong>) e Noite (<strong>21:00</strong>) para as máquinas 1, 3 e 4.
               </p>
             </div>
           </div>
