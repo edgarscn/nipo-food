@@ -107,6 +107,19 @@ const RulesBanner = () => {
             </div>
           </div>
 
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0, lineHeight: 1 }}>🎨</span>
+            <div>
+              <strong style={{ color: 'var(--text-primary)' }}>Cores dos Horários:</strong>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                • <strong style={{ color: '#F59E0B' }}>Amarelo:</strong> Agendado (aguardando confirmação)<br />
+                • <strong style={{ color: '#EF4444' }}>Vermelho:</strong> Confirmado (presença garantida)<br />
+                • <strong style={{ color: '#94A3B8' }}>Cinza:</strong> Trancado / turno expirado<br />
+                • <strong style={{ color: 'var(--color-primary)' }}>Ciano:</strong> Livre para agendamento
+              </p>
+            </div>
+          </div>
+
         </div>
       )}
     </div>

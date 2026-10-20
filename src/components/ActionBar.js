@@ -47,14 +47,16 @@ const ActionBar = ({
         if (!b) {
           msg += `   • *${t}:* _Livre ✨_\n`;
         } else if (b.confirmed) {
-          msg += `   • *${t}:* *${b.userName}* (Confirmado ✅)\n`;
+          msg += `   • *${t}:* *${b.userName}* (Confirmado 🔴)\n`;
         } else {
-          msg += `   • *${t}:* *${b.userName}* (Aguardando confirmação ⏳)\n`;
+          msg += `   • *${t}:* *${b.userName}* (Agendado 🟡)\n`;
         }
       });
       msg += `\n`;
     });
 
+    msg += `🟡 *Amarelo:* Agendado (aguardando confirmação no dia)\n`;
+    msg += `🔴 *Vermelho:* Confirmado (presença garantida)\n`;
     msg += `⚠️ *Regra:* Confirmar presença no app dentro do horário de tolerância (até 25min após início) para não perder a vaga!\n`;
     msg += `🔄 *Reset:* Automático todo domingo às 23:59.\n`;
     msg += `🔗 Agende qualquer dia da semana: https://aesthetic-daffodil-24b59a.netlify.app/`;
@@ -92,17 +94,28 @@ const ActionBar = ({
             Vagas em {selectedDayName ? selectedDayName.split(' ')[0] : 'Hoje'}
           </span>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            {dayBooked} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/ 9 vagas</span>
+            {dayBooked} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/ 9</span>
           </span>
         </div>
 
         <div style={{ width: '1px', height: '30px', background: 'var(--border-color)' }} />
 
         <div>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>
-            Confirmados
+          <span style={{ fontSize: '0.8rem', color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            🟡 Agendados
           </span>
-          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-success)' }}>
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F59E0B' }}>
+            {dayBooked - dayConfirmed}
+          </span>
+        </div>
+
+        <div style={{ width: '1px', height: '30px', background: 'var(--border-color)' }} />
+
+        <div>
+          <span style={{ fontSize: '0.8rem', color: '#EF4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            🔴 Confirmados
+          </span>
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#EF4444' }}>
             {dayConfirmed}
           </span>
         </div>
