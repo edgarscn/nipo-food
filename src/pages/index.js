@@ -14,9 +14,9 @@ const MACHINES = [1, 2, 4];
 const TIMES = ["08:00", "14:00", "21:00"];
 
 const SLOT_CONFIGS = {
-  "08:00": { openMin: 390, closeMin: 505 },   // 6:30 até 8h25
-  "14:00": { openMin: 750, closeMin: 865 },   // 12:30 até 14h25
-  "21:00": { openMin: 1170, closeMin: 1285 }  // 19:30 até 21h25
+  "08:00": { openMin: 390, closeMin: 505, lockMin: 540, lockTime: "09:00" },   // 6:30 até 8h25, liberado até 09:00, tranca às 09:00
+  "14:00": { openMin: 750, closeMin: 865, lockMin: 900, lockTime: "15:00" },   // 12:30 até 14h25, liberado até 15:00, tranca às 15:00
+  "21:00": { openMin: 1170, closeMin: 1285, lockMin: 1320, lockTime: "22:00" }  // 19:30 até 21h25, liberado até 22:00, tranca às 22:00
 };
 
 const formatDateKey = (date) => {
@@ -317,12 +317,14 @@ const IndexPage = () => {
   };
 
   // Open booking modal
-  const handleOpenBookModal = (machineId, time, dateKey, dayName) => {
+  const handleOpenBookModal = (machineId, time, dateKey, dayName, isLastChance, lockTime) => {
     setTargetSlot({ 
       machineId, 
       time, 
       dateKey: dateKey || selectedDateKey, 
-      dayName: dayName || selectedDay.dayName 
+      dayName: dayName || selectedDay.dayName,
+      isLastChance: !!isLastChance,
+      lockTime: lockTime || (SLOT_CONFIGS[time] ? SLOT_CONFIGS[time].lockTime : '')
     });
     setBookingModalOpen(true);
   };
@@ -335,13 +337,22 @@ const IndexPage = () => {
     const isToday = dateKey === todayDateKey;
     const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
     const config = SLOT_CONFIGS[time];
+
+    // If today and passed lockMin, don't allow booking
+    if (isToday && config && currentMinutes > config.lockMin) {
+      alert(`Este horário foi trancado às ${config.lockTime} e não aceita mais reservas.`);
+      return;
+    }
+
     const isWindowOpen = isToday && config && (currentMinutes >= config.openMin && currentMinutes <= config.closeMin);
+    const isLastChance = isToday && config && (currentMinutes > config.closeMin && currentMinutes <= config.lockMin);
+    const shouldAutoConfirm = isWindowOpen || isLastChance;
 
     const newBooking = {
       userName: name,
       bookedAt: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      confirmed: isWindowOpen, // If booking directly during the window today, auto-confirm
-      confirmedAt: isWindowOpen ? currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
+      confirmed: shouldAutoConfirm, // If booking directly during the window or last-chance today, auto-confirm
+      confirmedAt: shouldAutoConfirm ? currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
     };
 
     const nextSlots = {

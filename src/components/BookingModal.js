@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Plus, Waves, Clock, Calendar } from 'lucide-react';
+import { X, User, Plus, Waves, Clock, Calendar, Zap } from 'lucide-react';
 
 const SLOT_DEADLINE_INFO = {
-  "08:00": { window: "6:30 até 8h25", text: "você tem de 6:30 até 8h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." },
-  "14:00": { window: "12:30 até 14h25", text: "você tem de 12:30 até 14h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." },
-  "21:00": { window: "19:30 até 21h25", text: "você tem de 19:30 até 21h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." }
+  "08:00": { window: "6:30 até 8h25", lock: "09:00", text: "você tem de 6:30 até 8h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." },
+  "14:00": { window: "12:30 até 14h25", lock: "15:00", text: "você tem de 12:30 até 14h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." },
+  "21:00": { window: "19:30 até 21h25", lock: "22:00", text: "você tem de 19:30 até 21h25 para confirmar aqui no app que realmente vai usar , caso contrário, será disponibilizado esse horário a outra pessoa." }
 };
 
 const BookingModal = ({ 
   isOpen, 
   onClose, 
-  targetSlot, // { machineId, time, dateKey, dayName, isFutureDay }
+  targetSlot, // { machineId, time, dateKey, dayName, isLastChance, lockTime }
   savedUserName, 
   onConfirmBooking 
 }) => {
@@ -39,8 +39,12 @@ const BookingModal = ({
 
   const deadlineConfig = SLOT_DEADLINE_INFO[targetSlot.time] || {
     window: `até 25min após às ${targetSlot.time}`,
+    lock: "o fim do turno",
     text: `você tem até 25min após às ${targetSlot.time} para confirmar aqui no app que realmente vai usar, caso contrário, será disponibilizado esse horário a outra pessoa.`
   };
+
+  const isLastChance = targetSlot.isLastChance;
+  const lockTime = targetSlot.lockTime || deadlineConfig.lock;
 
   return (
     <div style={{
@@ -59,7 +63,7 @@ const BookingModal = ({
     }} className="animate-fade-in">
       
       <div className="glass-panel" style={{
-        maxWidth: '430px',
+        maxWidth: '440px',
         width: '100%',
         padding: '24px',
         position: 'relative'
@@ -72,19 +76,19 @@ const BookingModal = ({
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: 'rgba(0, 180, 216, 0.2)',
+              background: isLastChance ? 'rgba(245, 158, 11, 0.2)' : 'rgba(0, 180, 216, 0.2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'var(--color-primary)'
+              color: isLastChance ? '#F59E0B' : 'var(--color-primary)'
             }}>
-              <Waves size={20} />
+              {isLastChance ? <Zap size={20} /> : <Waves size={20} />}
             </div>
             <div>
               <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', margin: 0 }}>
                 Reservar Máquina {targetSlot.machineId}
               </h3>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.8rem', color: isLastChance ? '#F59E0B' : 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                   <Calendar size={13} /> {targetSlot.dayName || 'Hoje'}
                 </span>
@@ -92,6 +96,9 @@ const BookingModal = ({
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                   <Clock size={13} /> {targetSlot.time}
                 </span>
+                {isLastChance && (
+                  <span style={{ fontWeight: 800 }}>• Vaga Liberada!</span>
+                )}
               </div>
             </div>
           </div>
@@ -120,7 +127,7 @@ const BookingModal = ({
                 autoFocus
                 style={{ paddingLeft: '40px' }}
               />
-              <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-primary)' }} />
+              <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: isLastChance ? '#F59E0B' : 'var(--color-primary)' }} />
             </div>
             {error && (
               <span style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>
@@ -129,24 +136,44 @@ const BookingModal = ({
             )}
           </div>
 
-          <div style={{
-            background: 'rgba(0, 180, 216, 0.08)',
-            border: '1px solid var(--border-color)',
-            padding: '12px 14px',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: '0.85rem',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.45
-          }}>
-            ℹ️ <strong>Lembrete importante:</strong> {deadlineConfig.text}
-          </div>
+          {/* Conditional Alert Banner */}
+          {isLastChance ? (
+            <div style={{
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.85rem',
+              color: 'var(--text-primary)',
+              lineHeight: 1.45
+            }}>
+              ⚡ <strong>Vaga de Uso Imediato:</strong> Esta máquina não foi confirmada no prazo e foi liberada pelo sistema. Você tem até às <strong>{lockTime}</strong> para reservar e usar. Às <strong>{lockTime}</strong> o horário será trancado. Sua presença é confirmada automaticamente ao reservar!
+            </div>
+          ) : (
+            <div style={{
+              background: 'rgba(0, 180, 216, 0.08)',
+              border: '1px solid var(--border-color)',
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.45
+            }}>
+              ℹ️ <strong>Lembrete importante:</strong> {deadlineConfig.text}
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>
               Cancelar
             </button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-              <Plus size={16} /> Confirmar Reserva
+            <button 
+              type="submit" 
+              className={isLastChance ? "btn btn-warning" : "btn btn-primary"} 
+              style={{ flex: 1, fontWeight: 700 }}
+            >
+              {isLastChance ? <Zap size={16} /> : <Plus size={16} />}
+              {isLastChance ? "Confirmar e Usar Agora" : "Confirmar Reserva"}
             </button>
           </div>
         </form>

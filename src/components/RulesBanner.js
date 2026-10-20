@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Info, ChevronDown, ChevronUp, Clock, AlertTriangle, RotateCcw, Calendar, ShieldCheck } from 'lucide-react';
+import { Info, ChevronDown, ChevronUp, Clock, AlertTriangle, RotateCcw, Calendar, Zap, ShieldCheck } from 'lucide-react';
 
 const RulesBanner = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +27,7 @@ const RulesBanner = () => {
               Regras de Uso da Lavanderia
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Máquinas 1, 2 e 4 • Toda a semana • Reset domingo 23:59 • Admin (1531)
+              Máquinas 1, 2 e 4 • Toda a semana • Confirmação • Liberação & Trancamento
             </p>
           </div>
         </div>
@@ -54,9 +54,9 @@ const RulesBanner = () => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <Calendar size={16} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              <strong style={{ color: 'var(--text-primary)' }}>Agendamento Semanal Aberto:</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>Agendamento Semanal:</strong>
               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Você pode agendar horários em qualquer dia da semana (Segunda a Domingo) em quantas máquinas e turnos desejar.
+                Você pode agendar horários em qualquer dia da semana (Segunda a Domingo) em quantas máquinas precisar.
               </p>
             </div>
           </div>
@@ -79,7 +79,20 @@ const RulesBanner = () => {
                 • 08:00: confirmar de <strong>6:30 até 8h25</strong><br />
                 • 14:00: confirmar de <strong>12:30 até 14h25</strong><br />
                 • 21:00: confirmar de <strong>19:30 até 21h25</strong><br />
-                Se não confirmar no app, o horário é liberado para outra pessoa!
+                Se não confirmar no app até 25min após o horário, a vaga é liberada automaticamente!
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <Zap size={16} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ color: '#F59E0B' }}>Liberação e Trancamento:</strong>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                Se a máquina não foi reservada ou foi liberada por falta de confirmação:
+                <br />• 08:00: livre até <strong>09:00</strong> (depois tranca)
+                <br />• 14:00: livre até <strong>15:00</strong> (depois tranca)
+                <br />• 21:00: livre até <strong>22:00</strong> (depois tranca)
               </p>
             </div>
           </div>
@@ -87,9 +100,9 @@ const RulesBanner = () => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <RotateCcw size={16} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              <strong style={{ color: 'var(--text-primary)' }}>Reset Todo Domingo às 23:59:</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>Reset Semanal:</strong>
               <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                O quadro semanal é <strong>zerado automaticamente todo domingo às 23:59</strong> para a semana seguinte.
+                O quadro semanal é zerado <strong>todo domingo às 23:59</strong>. O Admin (senha 1531) pode zerar a qualquer momento.
               </p>
             </div>
           </div>
